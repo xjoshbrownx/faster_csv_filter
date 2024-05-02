@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>CSV Editor</title>
+</head>
+<body>
+    <div class="p-4 m-4">
+        <input type="file" id="csvFileInput">
+        <button class="p-4 m-4 border border-gray-500 rounded-md" id="deleteColumnBtn">Delete Column</button>
+        <button class="p-4 m-4 border border-gray-500 rounded-md" id="sortBtn">Sort</button>
+        <button class="p-4 m-4 border border-gray-500 rounded-md" id="exportBtn">Export</button>
+        <button class="p-4 m-4 border border-gray-500 rounded-md" id="clearBtn">Clear</button>
+        <input class="p-4 m-4 border border-gray-500 rounded-md" type="text" id="filterInput" placeholder="Enter keyword to filter by">
+    </div>
+    <div class="p-4 m-4 border border-gray-500 rounded-md" id="excludeSidebar">
+        <h3>Excluded Words</h3>
+        <div id="excludedWordsList"></div>
+    </div>
+    <div class="table-auto" id="csvTable"></div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
