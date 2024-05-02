@@ -208,13 +208,37 @@ document.getElementById('sortBtn').addEventListener('click', () => {
     }
 });
 
-document.getElementById('exportBtn').addEventListener('click', exportCSV);
+// document.getElementById('exportBtn').addEventListener('click', exportCSV);
+// Example event listener for exporting filtered data
+document.getElementById('exportBtn').addEventListener('click', function() {
+    const filteredData = csvData.filter((row, rowIndex) => {
+        if (rowIndex === 0) {
+            return true; // Include header row in export
+        }
+        return !Array.from(excludedWords).some(wordItem => {
+            const { word, columnIndex } = wordItem;
+            return row[columnIndex].toLowerCase().includes(word.toLowerCase());
+        });
+    });
+
+    exportCSV(filteredData); // Call export function with filtered data
+});
 
 document.getElementById('clearBtn').addEventListener('click', clearData);
 
+// document.getElementById('filterInput').addEventListener('input', function(event) {
+//     const keyword = event.target.value.toLowerCase();
+//     filterData(keyword);
+// });
+
+// Example event listener for filtering input
 document.getElementById('filterInput').addEventListener('input', function(event) {
-    const keyword = event.target.value.toLowerCase();
-    filterData(keyword);
+    const keyword = event.target.value.trim().toLowerCase();
+    if (keyword) {
+        filterDataWithExclusions();
+    } else {
+        renderTable(csvData); // If filter input is empty, render the original table
+    }
 });
 
 
@@ -227,7 +251,7 @@ function updateExcludedWordsList() {
 
     excludedWords.forEach(item => {
         const wordElement = document.createElement('div');
-        wordElement.textContent = `${item.word} (Column: ${data[0][item.columnIndex]})`; // Display word with column association
+        wordElement.textContent = `${item.word} (Column: ${csvData[0][item.columnIndex]})`; // Display word with column association
         wordElement.setAttribute('draggable', true);
 
         // Implement drag events
@@ -243,15 +267,56 @@ function updateExcludedWordsList() {
     });
 }
 
+// function updateExcludedWordsList() {
+//     const excludedWordsList = document.getElementById('excludedWordsList');
+//     excludedWordsList.innerHTML = '';
+
+//     excludedWords.forEach(item => {
+//         const wordElement = document.createElement('div');
+//         wordElement.textContent = `${item.word} (Column: ${data[0][item.columnIndex]})`; // Display word with column association
+//         wordElement.setAttribute('draggable', true);
+
+//         // Implement drag events
+//         wordElement.addEventListener('dragstart', event => {
+//             event.dataTransfer.setData('text/plain', JSON.stringify({ word: item.word, columnIndex: item.columnIndex }));
+//         });
+
+//         wordElement.addEventListener('dragend', event => {
+//             // Optional: Handle drag end behavior
+//         });
+
+//         excludedWordsList.appendChild(wordElement);
+//     });
+// }
+
 function filterDataWithExclusions() {
-    const filteredData = csvData.filter(row => {
-        const shouldIncludeRow = !Array.from(excludedWords).some(word => {
-            return row.some(cell => cell.toLowerCase().includes(word.toLowerCase()));
+    const filteredData = csvData.filter((row, rowIndex) => {
+        // Skip filtering the header row (rowIndex === 0)
+        if (rowIndex === 0) {
+            return true; // Keep the header row in the filtered data
+        }
+
+        // Check if any excluded word exists in the current row
+        const shouldIncludeRow = !Array.from(excludedWords).some(wordItem => {
+            const { word, columnIndex } = wordItem;
+            return row[columnIndex].toLowerCase().includes(word.toLowerCase());
         });
+
         return shouldIncludeRow;
     });
+
     renderTable(filteredData);
 }
+
+// function filterDataWithExclusions() {
+//     const filteredData = csvData.filter(row => {
+//         const shouldIncludeRow = !Array.from(excludedWords).some(word => {
+//             return row.some(cell => cell.toLowerCase().includes(word.toLowerCase()));
+//         });
+//         return shouldIncludeRow;
+//     });
+//     renderTable(filteredData);
+// }
 
 // Initialize drag-and-drop events for exclusion words
 const excludeSidebar = document.getElementById('excludeSidebar');
