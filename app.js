@@ -48,10 +48,12 @@ function renderTable(data) {
                 // Add hover effect, click-to-exclude, and drag capability to words
                 wordSpan.style.cursor = 'pointer'; // Set cursor to pointer for clickable effect
                 wordSpan.addEventListener('mouseover', () => {
-                    wordSpan.style.backgroundColor = 'lightyellow'; // Highlight on hover
+                    // wordSpan.style.backgroundColor = '#ed8936'; // Highlight on hover
+                    wordSpan.className = "p-2 border bg-blue-500 rounded-md"
                 });
                 wordSpan.addEventListener('mouseout', () => {
-                    wordSpan.style.backgroundColor = ''; // Remove highlight on mouseout
+                    // wordSpan.style.backgroundColor = ''; // Remove highlight on mouseout
+                    wordSpan.className = ''
                 });
                 wordSpan.addEventListener('click', () => {
                     const columnIndex = row.indexOf(cell); // Get the column index of the clicked word
