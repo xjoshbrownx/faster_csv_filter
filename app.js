@@ -3,9 +3,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load CSV data from localStorage on page load
     csvData = loadCSVDataFromLocalStorage();
     renderTable(csvData);
+    excludedWordsList = loadExcludedWordsFromLocalStorage();
+    updateExcludedWordsList()
 });
 
-// let csvData = [];
+// create rerunnable functional programming style that allows for undo, redo, and a clean refresh of data to output
+// add a preview layer for display that is filtered further when new filters are added
+// filtering functions operator on both the preview, but are stored so they can be applied to the 
+// reimport orig
+
+//features TODO
+// - add excluded_terms export and import
+// - add addWordToExcludedWordsList and removeWordFromExcludedWordsList functions
+
+//user opens page if data is stored it is retrieved 
+
+const previewdata = {};
+const filter_list = [];
+const sort_order = [];
+const excludedWords = new Set()
+
+// DATA IMPORT
 
 function loadCSV(file) {
     const reader = new FileReader();
@@ -18,13 +36,42 @@ function loadCSV(file) {
     reader.readAsText(file);
 }
 
+// CONTROL
+function undo() {
+
+} 
+
+
+// OUTPUT TO SCREEN
+function updateExcludedWordsList() {
+    const excludedWordsList = document.getElementById('excludedWordsList');
+    excludedWordsList.innerHTML = '';
+
+    excludedWords.forEach(item => {
+        const wordElement = document.createElement('div');
+        wordElement.textContent = `${item.word} (Column: ${csvData[0][item.columnIndex]})`; // Display word with column association
+        wordElement.setAttribute('draggable', true);
+
+        // Implement drag events
+        wordElement.addEventListener('dragstart', event => {
+            event.dataTransfer.setData('text/plain', JSON.stringify({ word: item.word, columnIndex: item.columnIndex }));
+        });
+
+        wordElement.addEventListener('dragend', event => {
+            // Optional: Handle drag end behavior
+        });
+
+        excludedWordsList.appendChild(wordElement);
+    });
+}
+
 function renderTable(data) {
     const table = document.getElementById('csvTable');
     table.innerHTML = '';
 
     // Create table header row with clickable column headers
     const headerRow = document.createElement('tr');
-    data[0].forEach((cell, colIndex) => {
+    data.at(0).forEach((cell, colIndex) => {
         const th = document.createElement('th');
         th.textContent = cell;
         th.className = 'px-4 py-2'
@@ -79,63 +126,7 @@ function renderTable(data) {
     });
 }
 
-// function renderTable(data) {
-//     const table = document.getElementById('csvTable');
-//     table.innerHTML = '';
-
-//     // Create table header row with clickable column headers
-//     const headerRow = document.createElement('tr');
-//     data[0].forEach((cell, colIndex) => {
-//         const th = document.createElement('th');
-//         th.textContent = cell;
-//         th.style.cursor = 'pointer'; // Set cursor to pointer for clickable effect
-//         th.addEventListener('click', () => toggleColumnFilter(colIndex));
-//         headerRow.appendChild(th);
-//     });
-//     table.appendChild(headerRow);
-
-//     // Create table rows with data
-//     data.slice(1).forEach(row => {
-//         const tr = document.createElement('tr');
-//         row.forEach(cell => {
-//             const td = document.createElement('td');
-//             const words = cell.split(' '); // Split cell content into words
-//             words.forEach(word => {
-//                 const wordSpan = document.createElement('span');
-//                 wordSpan.textContent = word;
-
-//                 // Add hover effect, click-to-exclude, and drag capability to words
-//                 wordSpan.style.cursor = 'pointer'; // Set cursor to pointer for clickable effect
-//                 wordSpan.addEventListener('mouseover', () => {
-//                     wordSpan.style.backgroundColor = 'lightyellow'; // Highlight on hover
-//                 });
-//                 wordSpan.addEventListener('mouseout', () => {
-//                     wordSpan.style.backgroundColor = ''; // Remove highlight on mouseout
-//                 });
-//                 wordSpan.addEventListener('click', () => {
-//                     excludedWords.add({ word, columnIndex: row.indexOf(cell) }); // Add word and column index to excludedWords Set
-//                     updateExcludedWordsList();
-//                     filterDataWithExclusions();
-//                 });
-//                 wordSpan.setAttribute('draggable', true);
-//                 wordSpan.addEventListener('dragstart', event => {
-//                     event.dataTransfer.setData('text/plain', JSON.stringify({ word, columnIndex: row.indexOf(cell) }));
-//                     wordSpan.style.backgroundColor = 'lightblue'; // Highlight when ready to drag
-//                 });
-//                 wordSpan.addEventListener('dragend', event => {
-//                     wordSpan.style.backgroundColor = ''; // Reset background color
-//                 });
-
-//                 td.appendChild(wordSpan);
-//                 td.appendChild(document.createTextNode(' ')); // Add space between words
-//             });
-//             tr.appendChild(td);
-//         });
-//         table.appendChild(tr);
-//     });
-// }
-
-function deleteColumn(colIndex) {
+function hideColumn(colIndex) {
     csvData.forEach(row => row.splice(colIndex, 1));
     saveCSVDataToLocalStorage(csvData); // Save updated CSV data to localStorage
     renderTable(csvData);
@@ -178,6 +169,9 @@ function exportCSV() {
 function clearData() {
     localStorage.removeItem('csvData'); // Remove CSV data from localStorage
     csvData = [];
+    excludedWords.clear();
+    updateExcludedWordsList();
+    document.getElementById('csvFileInput').value = ''
     renderTable(csvData);
 }
 
@@ -193,10 +187,10 @@ document.getElementById('csvFileInput').addEventListener('change', function(even
     loadCSV(file);
 });
 
-document.getElementById('deleteColumnBtn').addEventListener('click', function() {
+document.getElementById('hideColumnBtn').addEventListener('click', function() {
     const colIndex = prompt('Enter column index to delete:');
     if (colIndex !== null && !isNaN(colIndex)) {
-        deleteColumn(parseInt(colIndex));
+        hideColumn(parseInt(colIndex));
     }
 });
 
@@ -243,51 +237,6 @@ document.getElementById('filterInput').addEventListener('input', function(event)
 
 
 
-const excludedWords = new Set();
-
-function updateExcludedWordsList() {
-    const excludedWordsList = document.getElementById('excludedWordsList');
-    excludedWordsList.innerHTML = '';
-
-    excludedWords.forEach(item => {
-        const wordElement = document.createElement('div');
-        wordElement.textContent = `${item.word} (Column: ${csvData[0][item.columnIndex]})`; // Display word with column association
-        wordElement.setAttribute('draggable', true);
-
-        // Implement drag events
-        wordElement.addEventListener('dragstart', event => {
-            event.dataTransfer.setData('text/plain', JSON.stringify({ word: item.word, columnIndex: item.columnIndex }));
-        });
-
-        wordElement.addEventListener('dragend', event => {
-            // Optional: Handle drag end behavior
-        });
-
-        excludedWordsList.appendChild(wordElement);
-    });
-}
-
-// function updateExcludedWordsList() {
-//     const excludedWordsList = document.getElementById('excludedWordsList');
-//     excludedWordsList.innerHTML = '';
-
-//     excludedWords.forEach(item => {
-//         const wordElement = document.createElement('div');
-//         wordElement.textContent = `${item.word} (Column: ${data[0][item.columnIndex]})`; // Display word with column association
-//         wordElement.setAttribute('draggable', true);
-
-//         // Implement drag events
-//         wordElement.addEventListener('dragstart', event => {
-//             event.dataTransfer.setData('text/plain', JSON.stringify({ word: item.word, columnIndex: item.columnIndex }));
-//         });
-
-//         wordElement.addEventListener('dragend', event => {
-//             // Optional: Handle drag end behavior
-//         });
-
-//         excludedWordsList.appendChild(wordElement);
-//     });
-// }
 
 function filterDataWithExclusions() {
     const filteredData = csvData.filter((row, rowIndex) => {
@@ -398,6 +347,19 @@ function loadCSVDataFromLocalStorage() {
     return storedData ? JSON.parse(storedData) : [];
 }
 
+// Function to save CSV data to localStorage
+function saveExcludedWordsToLocalStorage(data) {
+    localStorage.setItem('excludedWords', JSON.stringify(data));
+}
+
+// Function to load CSV data from localStorage
+function loadExcludedWordsFromLocalStorage() {
+    excludedWords.clear()
+    raw_excluded_words = localStorage.getItem('excludedWords')
+    JSON.parse().forEach(word => {excludedWords.add(word)});
+    return excludedWords ? JSON.parse(raw_excluded_words) : [];
+}
+
 // Update filteredColumns set when a column is selected for filtering
 function toggleColumnFilter(colIndex) {
     if (filteredColumns.has(colIndex)) {
@@ -407,15 +369,3 @@ function toggleColumnFilter(colIndex) {
     }
     filterDataWithExclusions();
 }
-
-// Modify header row creation to add column filter click event
-data[0].forEach((cell, colIndex) => {
-    const th = document.createElement('th');
-    th.textContent = cell;
-    th.style.cursor = 'pointer'; // Set cursor to pointer for clickable effect
-    th.addEventListener('click', () => toggleColumnFilter(colIndex)); // Toggle column filter
-    headerRow.appendChild(th);
-});
-
-// Render initial table
-renderTable(csvData);
