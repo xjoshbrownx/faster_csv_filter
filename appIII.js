@@ -1,11 +1,28 @@
-// declare variables
+// Declare variables
 const csvData = [];
+const filteredRowList = [];
+const excludedWords = new Set();
 
-// initalize app
+
+// Initalize app
 document.addEventListener('DOMContentLoaded', () => {
-    csvData.length = 0;
     loadCSVDataFromLocalStorage().forEach(row => csvData.push(row));
-    populateActiveFileElement();
+    // const filteredData = [...csvData];
+
+    // If data exists
+    if (csvData.length > 0) {
+        // Populate Current File Text
+        populateActiveFileElement();
+        // Replace file picker with clear and export options
+        swapFileOptions();
+        excludedWords.clear()
+        // Populate exludedWords set variable
+        loadDataFromLocalStorage('excludedWords').forEach(({word, colIndex}) => {
+            excludedWords.add({ word, colIndex });
+        });
+        updateExcludedWordsList();
+    };
+    // filterDataWithExclusions();
     renderTable(csvData);
 })
 
@@ -16,10 +33,13 @@ function populateActiveFileElement() {
     // filename = filename.length ? filename : "No File Active"
     fileInput = document.getElementById('currentFile');
     fileInput.innerHTML = filename;
+    fileInputRows = document.getElementById('currentFileRows');
+    fileInputRows.innerHTML = csvData.length ? csvData.length - 1: 0;
     // fileInput.className = 'p-2 m-2';
 }
 
 function loadCSV(file) {
+    clearData();
     filename = file.name;
     saveDataToLocalStorage('filename',filename);
     const reader = new FileReader();
@@ -32,15 +52,14 @@ function loadCSV(file) {
         renderTable(csvData);
     };
     reader.readAsText(file);
-    populateActiveFileElement();
     swapFileOptions();
+    populateActiveFileElement();
 }
 
 function swapFileOptions() {
     csvController = document.getElementById('csvController');
     if (csvController.getElementsByTagName('input').length) {
         csvController.className = 'flex flex-row m-1 w-2/5'
-        console.log('was input');
         csvController.innerHTML = '';
         clearDiv = document.createElement('div');
         clearDiv.className = "m-1 w-1/2 m-2 border border-gray-500 rounded-md";
@@ -56,15 +75,16 @@ function swapFileOptions() {
         exportBtn.id = 'exportData'
         exportBtn.className = 'p-2 m-2'
         exportBtn.textContent = 'Export CSV'
-        exportBtn.addEventListener('click', exportData);
+        exportBtn.addEventListener('click', exportCSV);
         exportDiv.appendChild(exportBtn)
         csvController.appendChild(clearDiv);
         csvController.appendChild(exportDiv);    
     } else if (csvController.getElementsByTagName('div').length) {
-        console.log('was div');
         csvController.innerHTML = '';
         inputFile = document.createElement('input');
         inputFile.id = 'csvFileInput';
+        inputFile.type = 'file';
+        inputFile.accept=".csv";
         inputFile.className = 'p-2 m-2';
         inputFile.addEventListener('change', function(event) {
             const file = event.target.files[0];
@@ -78,25 +98,35 @@ function swapFileOptions() {
 
 function clearData() {
     localStorage.removeItem('csvData'); // Remove CSV data from localStorage
-    localStorage.removeItem('filename');
+    saveDataToLocalStorage('filename','No Active File');
     // document.getElementById('csvFileInput').value = null
     csvData.length = 0;
     populateActiveFileElement();
     renderTable(csvData);
     swapFileOptions();
-
-    // excludedWords.clear();
-    // updateExcludedWordsList();
+    excludedWords.clear();
+    localStorage.removeItem('excludedWords');
+    updateExcludedWordsList();
 }
 
-function exportData() {
-    // DATA to be exported from stored table and rerun through excluded word filters
+function exportCSV() {
+    filename = loadDataFromLocalStorage('filename')
+    const csvContent = csvData.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}_filtered.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 
 // TABLE FORMATTING
 
 function rowSplit(row, delimiter) {
     // Parse a CSV line into an array of columns
+    // Ensures that delimites within quotes aren't used to split the column
     const columns = [];
     let currentColumn = '';
     let withinQuotes = false;
@@ -132,6 +162,7 @@ function loadDataFromLocalStorage(key) {
 
 // Function to save CSV data to localStorage 
 function saveDataToLocalStorage(key, value) {
+    // if (typeof value === 'set') {value=Array.from(value);}
     localStorage.setItem(key, JSON.stringify(value));
 }
 
@@ -165,7 +196,7 @@ function renderRow(row, header=false) {
         const td = document.createElement(dtl_el);
         td.className = 'px-4 py-2';
         // runs cell prep on cell if not header else runs header prep 
-        const words = header ? headerPrep(cell) : cellPrep(cell);
+        const words = header ? headerPrep(cell) : cellPrep(cell, colIndex);
         // const words = cell;
         words.forEach(word => td.appendChild(word));
         tr.appendChild(td);
@@ -189,14 +220,13 @@ function sortColumns() {
 
 function cellSpan(cellContent) {
     const cellSpan = document.createElement('span');
-    cellSpan.textContent = word;
     cellSpan.className = 'p-2';
     cellSpan.textContent = cellContent;
     return cellSpan;
 }
 
 // Function to prep cells for display
-function cellPrep(cell, trunc=2, hl_clr='lightblue') {
+function cellPrep(cell, colIndex, trunc=2) {
     const out_arr = []
     if (typeof (cell) === "number") {
         if (!isNaN(cell.trim())) {
@@ -230,8 +260,9 @@ function cellPrep(cell, trunc=2, hl_clr='lightblue') {
                 wordSpan.className = 'p-2'
             });
             wordSpan.addEventListener('click', () => {
-                const columnIndex = row.indexOf(cell); // Get the column index of the clicked word
-                excludedWords.add({ word, columnIndex }); // Add word and column index to excludedWords Set
+                // const columnIndex = row.indexOf(cell); // Get the column index of the clicked word
+                excludedWords.add({ word, colIndex }); // Add word and column index to excludedWords Set
+                saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
                 updateExcludedWordsList();
                 filterDataWithExclusions();
             });     
@@ -241,8 +272,45 @@ function cellPrep(cell, trunc=2, hl_clr='lightblue') {
     return out_arr;
 }
 
-// EVENT LISTENERS
+function filterDataWithExclusions() {
+    const filteredData = csvData.filter((row, rowIndex) => {
+        // Skip filtering the header row (rowIndex === 0)
+        if (rowIndex === 0) {
+            return true; // Keep the header row in the filtered data
+        }
 
+        // Check if any excluded word exists in the current row
+        const shouldIncludeRow = !Array.from(excludedWords).some(wordItem => {
+            const { word, colIndex } = wordItem;
+            return row[colIndex].toLowerCase().includes(word.toLowerCase());
+        });
+
+        return shouldIncludeRow;
+    });
+    console.log('filterRan')
+    renderTable(filteredData);
+}
+
+// OUTPUT TO SCREEN
+function updateExcludedWordsList() {
+    const excludedWordsList = document.getElementById('excludedWordsList');
+    excludedWordsList.innerHTML = '';
+            
+    excludedWords.forEach(item => {
+        // const {word, colIndex} = item;
+        const wordElement = document.createElement('div');
+        wordElement.textContent = `${item.word} (${csvData[0][item.colIndex]})`; // Display word with column association
+        wordElement.className = 'p-2 m-2 bg-amber-300 rounded-md';
+        wordElement.addEventListener('click', event => {
+            excludedWords.delete(item);
+            updateExcludedWordsList();
+            saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
+        });
+        excludedWordsList.appendChild(wordElement);
+    });
+}
+
+// EVENT LISTENERS
 document.getElementById('csvFileInput').addEventListener('change', function(event) {
     const file = event.target.files[0];
     loadCSV(file);
