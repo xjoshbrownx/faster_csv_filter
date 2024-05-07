@@ -52,7 +52,8 @@ function loadCSV(file) {
         renderTable(csvData);
     };
     reader.readAsText(file);
-    swapFileOptions();
+
+    // swapFileOptions();
     populateActiveFileElement();
 }
 
@@ -101,9 +102,9 @@ function clearData() {
     saveDataToLocalStorage('filename','No Active File');
     // document.getElementById('csvFileInput').value = null
     csvData.length = 0;
-    populateActiveFileElement();
     renderTable(csvData);
     swapFileOptions();
+    populateActiveFileElement();
     excludedWords.clear();
     localStorage.removeItem('excludedWords');
     updateExcludedWordsList();
@@ -185,16 +186,17 @@ function renderTable(tableData) {
     table.innerHTML = '';
     tableData.forEach((row, rowIndex) => {
         const header = rowIndex===0 ? true : false
-        table.appendChild(renderRow(row,header))
+        table.appendChild(renderRow(row,rowIndex,header))
     }) 
 }
 
-function renderRow(row, header=false) {
+function renderRow(row, rowIndex, header=false) {
+    rowColor = rowIndex % 2 ? 'bg-lime-100' : 'bg-lime-200';
     dtl_el = header ? 'th' : 'td' //detail element is table header or table detail
     const tr = document.createElement('tr');
     row.forEach((cell, colIndex) => {
         const td = document.createElement(dtl_el);
-        td.className = 'px-4 py-2';
+        td.className = `px-4 py-2 ${rowColor}`;
         // runs cell prep on cell if not header else runs header prep 
         const words = header ? headerPrep(cell) : cellPrep(cell, colIndex);
         // const words = cell;
