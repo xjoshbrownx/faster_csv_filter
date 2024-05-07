@@ -2,6 +2,7 @@
 const csvData = [];
 const filteredRowList = [];
 const excludedWords = new Set();
+// let filteredRowLength = 0;
 
 function initializeApp() {
     // Initalize app
@@ -29,13 +30,14 @@ function initializeApp() {
 
 // FILE MANAGEMENT
 
-function populateActiveFileElement() {
+function populateActiveFileElement(filteredRowLength) {
     filename = loadDataFromLocalStorage('filename');
     // filename = filename.length ? filename : "No File Active"
     fileInput = document.getElementById('currentFile');
     fileInput.innerHTML = filename;
     fileInputRows = document.getElementById('currentFileRows');
-    fileInputRows.innerHTML = csvData.length ? csvData.length - 1: 0;
+    fileInputRows.textContent = filteredRowLength;
+    // fileInputRows.innerHTML = csvData.length ? csvData.length - 1: 0;
     // fileInput.className = 'p-2 m-2';
 }
 
@@ -180,13 +182,13 @@ function saveCSVDataToLocalStorage(data) {
 
 // Function to 
 function renderTable(tableData) {
+    populateActiveFileElement(tableData.length);
     const table = document.getElementById('csvTable');
     table.innerHTML = '';
     tableData.forEach((row, rowIndex) => {
         const header = rowIndex===0 ? true : false
         table.appendChild(renderRow(row,rowIndex,header))
     }) 
-    populateActiveFileElement();
 }
 
 function renderRow(row, rowIndex, header=false) {
@@ -290,6 +292,7 @@ function filterDataWithExclusions() {
 
         return shouldIncludeRow;
     });
+
     console.log('filterRan')
     renderTable(filteredData);
 }
