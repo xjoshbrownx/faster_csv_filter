@@ -77,7 +77,7 @@ function swapFileOptions() {
         exportBtn.id = 'exportData'
         exportBtn.className = 'p-2 m-2'
         exportBtn.textContent = 'Export CSV'
-        exportBtn.addEventListener('click', exportCSV);
+        exportBtn.addEventListener('click', exportFilteredCSV);
         exportDiv.appendChild(exportBtn)
         csvController.appendChild(clearDiv);
         csvController.appendChild(exportDiv);    
@@ -111,9 +111,15 @@ function clearData() {
     updateExcludedWordsList();
 }
 
-function exportCSV() {
-    filename = loadDataFromLocalStorage('filename')
-    const csvContent = filterTable(csvData, excludedWords).map(row => row.map(value => {
+function exportFilteredCSV() {
+    let filename = loadDataFromLocalStorage('filename');
+    filename = `${filename.replace('.csv','')}_filtered`;
+    let tableData = filterTable(csvData, excludedWords);
+    exportCSV(filename, tableData);
+}
+
+function exportCSV(filename, tableData) {
+    const csvContent = tableData.map(row => row.map(value => {
         if (typeof value === 'string') {
             // Enclose string values in double quotes and escape double quotes inside
             return `"${value.replace(/"/g, '""')}"`;
@@ -126,7 +132,7 @@ function exportCSV() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${filename}_filtered.csv`;
+    a.download = `${filename}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
