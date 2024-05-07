@@ -18,11 +18,12 @@ function initializeApp() {
             swapFileOptions();
             excludedWords.clear()
             // Populate exludedWords set variable
+            
             loadDataFromLocalStorage('excludedWords').forEach(({word, colIndex}) => {
                 excludedWords.add({ word, colIndex });
             });
-            updateExcludedWordsList();
         };
+        updateExcludedWordsList();
         filterDataWithExclusions();
         // renderTable(csvData);
     })
@@ -59,7 +60,7 @@ function loadCSV(file) {
 }
 
 function swapFileOptions() {
-    csvController = document.getElementById('csvController');
+    const csvController = document.getElementById('csvController');
     if (csvController.getElementsByTagName('input').length) {
         csvController.className = 'flex flex-row m-1 w-2/5'
         csvController.innerHTML = '';
@@ -83,7 +84,7 @@ function swapFileOptions() {
         csvController.appendChild(exportDiv);    
     } else if (csvController.getElementsByTagName('div').length) {
         csvController.innerHTML = '';
-        inputFile = document.createElement('input');
+        const inputFile = document.createElement('input');
         inputFile.id = 'csvFileInput';
         inputFile.type = 'file';
         inputFile.accept=".csv";
@@ -98,16 +99,17 @@ function swapFileOptions() {
     
 }
 
+// clears filename, csvdata, excluded words from local storage and from page
 function clearData() {
     localStorage.removeItem('csvData'); // Remove CSV data from localStorage
     saveDataToLocalStorage('filename','No Active File');
+    localStorage.removeItem('excludedWords');
     // document.getElementById('csvFileInput').value = null
     csvData.length = 0;
+    excludedWords.clear();
     renderTable(csvData);
     swapFileOptions();
     populateActiveFileElement();
-    excludedWords.clear();
-    localStorage.removeItem('excludedWords');
     updateExcludedWordsList();
 }
 
@@ -194,7 +196,7 @@ function saveCSVDataToLocalStorage(data) {
     localStorage.setItem('csvData', JSON.stringify(data));
 }
 
-// Function to 
+// Function to render table to html on page
 function renderTable(tableData) {
     populateActiveFileElement(tableData.length);
     const tableContainer = document.getElementById('csvTableContainer');
@@ -293,10 +295,12 @@ function sortColumns() {
     
 }
 
+// filter function used for display
 function filterDataWithExclusions() {
     renderTable(filterTable(csvData, excludedWords));
 }
 
+// generic table filtering function used for both display and export
 function filterTable(tableData, wordList) {
     const filteredData = tableData.filter((row, rowIndex) => {
         // Skip filtering the header row (rowIndex === 0)
@@ -319,24 +323,99 @@ function filterTable(tableData, wordList) {
 function updateExcludedWordsList() {
     const excludedWordsList = document.getElementById('excludedWordsList');
     excludedWordsList.innerHTML = '';
-    const excludedWordsText = document.createElement('h3')
-    excludedWordsText.textContent = 'Excluded Words:';
-    excludedWordsText.className = 'p-2 m-2 w-1/5 rounded-md border border-gray-500';
+    const excludedWordsText = sidebarBtnGen('h3','Excluded Words:', 'lime-300');
     excludedWordsList.appendChild(excludedWordsText);
     excludedWords.forEach(item => {
         // const {word, colIndex} = item;
-        const wordElement = document.createElement('div');
-        wordElement.textContent = `${item.word} (${csvData[0][item.colIndex]})`; // Display word with column association
-        wordElement.className = 'p-2 m-2 w-1/5 bg-amber-300 rounded-md';
-        wordElement.addEventListener('click', event => {
-            excludedWords.delete(item);
-            updateExcludedWordsList();
-            saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
-            filterDataWithExclusions();
-        });
+        let text = `${item.word} (${csvData[0][item.colIndex]})`;
+        let eventFunc = wordElementLogic(item);
+        const wordElement = sidebarBtnGen('div',text, 'lime-100', '', 'click', eventFunc);
         excludedWordsList.appendChild(wordElement);
     });
+    if (excludedWords.size) {
+        exportExclude = sidebarBtnGen('div','Export List','lime-400','','click',exportExcludeWords);
+        clearExclude = sidebarBtnGen('div','Clear List','red-400','','click',clearExcludeWords);
+        excludedWordsList.appendChild(exportExclude);
+        excludedWordsList.appendChild(clearExclude);
+    } else {
+            const importExclude = document.createElement('input');
+            importExclude.id = 'excludeListInput';
+            importExclude.type = 'file';
+            importExclude.accept=".csv";
+            importExclude.textContent = 'Import Excluded Words List';
+            importExclude.className = 'p-2 m-2 rounded-md';
+            importExclude.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                importExcludeWords(file);
+            }); 
+        excludedWordsList.appendChild(importExclude);  
+    };
+}
 
+// converts excluded words to an array for csv export
+function excludedWordsToArray(setOfObjects) {
+    // Convert set of objects to array of arrays
+    return Array.from(setOfObjects, obj => [obj.word, obj.colIndex]);
+}
+
+function arrayOfArraysToSet(arrayOfArrays) {
+    // Convert array of arrays to set of objects
+    const setOfObjects = new Set(arrayOfArrays.map(arr => ({ prop1: arr[0], prop2: arr[1] })));
+    return setOfObjects;
+}
+
+function clearExcludeWords() {
+    excludedWords.clear();
+    localStorage.removeItem('excludedWords');
+    updateExcludedWordsList();
+    filterDataWithExclusions();
+}
+
+function importExcludeWords(file){
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const file = []
+        const csv = event.target.result;
+        csvSplit = csv.split('\n');
+        csvSplit.map(row => file.push(rowSplit(row,','))); // OPTIONS DELIMITER IS FLEXIBLE
+        file.forEach((word, colIndex) => {
+            excludedWords.add({ word, colIndex });
+        });
+        saveDataToLocalStorage('excludedWords',excludedWords);
+        updateExcludedWordsList();
+    };
+    reader.readAsText(file);
+
+
+}
+
+function exportExcludeWords(){
+    const csvPrep = [];
+    excludedWords.forEach(word => {
+        csvPrep.push(word);
+    });
+    let filename = loadDataFromLocalStorage('filename');
+    filename = `${filename.replace('.csv','')}_excludes`;
+    exportCSV(filename, excludedWordsToArray(csvPrep));
+}
+
+function wordElementLogic(item) {
+    return function(event) {
+        excludedWords.delete(item);
+        updateExcludedWordsList();
+        saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
+        filterDataWithExclusions(); 
+    };
+}
+
+function sidebarBtnGen(type, text, color='amber-100', className='', event='', func='') {
+    const wordButton = document.createElement(type);
+    wordButton.textContent = text; 
+    wordButton.className = className ? className : `p-2 m-2 bg-${color} rounded-md`;
+    if (event) {
+        wordButton.addEventListener(event, func);
+    }
+    return wordButton;
 }
 
 initializeApp()
