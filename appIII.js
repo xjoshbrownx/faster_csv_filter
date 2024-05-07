@@ -52,8 +52,6 @@ function loadCSV(file) {
         renderTable(csvData);
     };
     reader.readAsText(file);
-
-    // swapFileOptions();
     populateActiveFileElement();
 }
 
@@ -167,7 +165,6 @@ function saveDataToLocalStorage(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
 }
 
-
 // Function to load CSV data from localStorage 
 // if csv exists else returns empty array
 function loadCSVDataFromLocalStorage() {
@@ -214,10 +211,6 @@ function headerPrep(cell) {
     headerSpan.textContent = cell
     out_arr.push(headerSpan)
     return out_arr;
-}
-
-function sortColumns() {
-    
 }
 
 function cellSpan(cellContent) {
@@ -274,6 +267,10 @@ function cellPrep(cell, colIndex, trunc=2) {
     return out_arr;
 }
 
+function sortColumns() {
+    
+}
+
 function filterDataWithExclusions() {
     const filteredData = csvData.filter((row, rowIndex) => {
         // Skip filtering the header row (rowIndex === 0)
@@ -284,7 +281,9 @@ function filterDataWithExclusions() {
         // Check if any excluded word exists in the current row
         const shouldIncludeRow = !Array.from(excludedWords).some(wordItem => {
             const { word, colIndex } = wordItem;
-            return row[colIndex].toLowerCase().includes(word.toLowerCase());
+            console.log(typeof row[colIndex]);
+            
+            return row[colIndex] ? row[colIndex].toLowerCase().includes(word.toLowerCase()): '';
         });
 
         return shouldIncludeRow;
@@ -297,16 +296,20 @@ function filterDataWithExclusions() {
 function updateExcludedWordsList() {
     const excludedWordsList = document.getElementById('excludedWordsList');
     excludedWordsList.innerHTML = '';
-            
+    const excludedWordsText = document.createElement('h3')
+    excludedWordsText.textContent = 'Excluded Words:';
+    excludedWordsText.className = 'p-2 m-2 w-1/5 rounded-md border border-gray-500';
+    excludedWordsList.appendChild(excludedWordsText);
     excludedWords.forEach(item => {
         // const {word, colIndex} = item;
         const wordElement = document.createElement('div');
         wordElement.textContent = `${item.word} (${csvData[0][item.colIndex]})`; // Display word with column association
-        wordElement.className = 'p-2 m-2 bg-amber-300 rounded-md';
+        wordElement.className = 'p-2 m-2 w-1/5 bg-amber-300 rounded-md';
         wordElement.addEventListener('click', event => {
             excludedWords.delete(item);
             updateExcludedWordsList();
             saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
+            
         });
         excludedWordsList.appendChild(wordElement);
     });
