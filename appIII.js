@@ -3,28 +3,29 @@ const csvData = [];
 const filteredRowList = [];
 const excludedWords = new Set();
 
-
-// Initalize app
-document.addEventListener('DOMContentLoaded', () => {
-    loadCSVDataFromLocalStorage().forEach(row => csvData.push(row));
-    // const filteredData = [...csvData];
-
-    // If data exists
-    if (csvData.length > 0) {
-        // Populate Current File Text
-        populateActiveFileElement();
-        // Replace file picker with clear and export options
-        swapFileOptions();
-        excludedWords.clear()
-        // Populate exludedWords set variable
-        loadDataFromLocalStorage('excludedWords').forEach(({word, colIndex}) => {
-            excludedWords.add({ word, colIndex });
-        });
-        updateExcludedWordsList();
-    };
-    // filterDataWithExclusions();
-    renderTable(csvData);
-})
+function initializeApp() {
+    // Initalize app
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCSVDataFromLocalStorage().forEach(row => csvData.push(row));
+        // const filteredData = [...csvData];
+    
+        // If data exists
+        if (csvData.length > 0) {
+            // Populate Current File Text
+            populateActiveFileElement();
+            // Replace file picker with clear and export options
+            swapFileOptions();
+            excludedWords.clear()
+            // Populate exludedWords set variable
+            loadDataFromLocalStorage('excludedWords').forEach(({word, colIndex}) => {
+                excludedWords.add({ word, colIndex });
+            });
+            updateExcludedWordsList();
+        };
+        filterDataWithExclusions();
+        // renderTable(csvData);
+    })
+}
 
 // FILE MANAGEMENT
 
@@ -185,6 +186,7 @@ function renderTable(tableData) {
         const header = rowIndex===0 ? true : false
         table.appendChild(renderRow(row,rowIndex,header))
     }) 
+    populateActiveFileElement();
 }
 
 function renderRow(row, rowIndex, header=false) {
@@ -309,11 +311,14 @@ function updateExcludedWordsList() {
             excludedWords.delete(item);
             updateExcludedWordsList();
             saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
-            
+            filterDataWithExclusions();
         });
         excludedWordsList.appendChild(wordElement);
     });
+
 }
+
+initializeApp()
 
 // EVENT LISTENERS
 document.getElementById('csvFileInput').addEventListener('change', function(event) {
