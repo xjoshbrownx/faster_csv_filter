@@ -113,7 +113,15 @@ function clearData() {
 
 function exportCSV() {
     filename = loadDataFromLocalStorage('filename')
-    const csvContent = csvData.map(row => row.join(',')).join('\n');
+    const csvContent = filterTable(csvData, excludedWords).map(row => row.map(value => {
+        if (typeof value === 'string') {
+            // Enclose string values in double quotes and escape double quotes inside
+            return `"${value.replace(/"/g, '""')}"`;
+        } else {
+            // Convert non-string values to string and handle as needed
+            return String(value);
+        }
+    }).join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -183,12 +191,16 @@ function saveCSVDataToLocalStorage(data) {
 // Function to 
 function renderTable(tableData) {
     populateActiveFileElement(tableData.length);
-    const table = document.getElementById('csvTable');
-    table.innerHTML = '';
+    const tableContainer = document.getElementById('csvTableContainer');
+    tableContainer.innerHTML = '';
+    const table = document.createElement('table');
+    table.id = "csvTable";
+    table.className = 'table-auto';
     tableData.forEach((row, rowIndex) => {
         const header = rowIndex===0 ? true : false
         table.appendChild(renderRow(row,rowIndex,header))
     }) 
+    tableContainer.appendChild(table);
 }
 
 function renderRow(row, rowIndex, header=false) {
@@ -276,25 +288,25 @@ function sortColumns() {
 }
 
 function filterDataWithExclusions() {
-    const filteredData = csvData.filter((row, rowIndex) => {
+    renderTable(filterTable(csvData, excludedWords));
+}
+
+function filterTable(tableData, wordList) {
+    const filteredData = tableData.filter((row, rowIndex) => {
         // Skip filtering the header row (rowIndex === 0)
         if (rowIndex === 0) {
             return true; // Keep the header row in the filtered data
         }
 
         // Check if any excluded word exists in the current row
-        const shouldIncludeRow = !Array.from(excludedWords).some(wordItem => {
+        const shouldIncludeRow = !Array.from(wordList).some(wordItem => {
             const { word, colIndex } = wordItem;
-            console.log(typeof row[colIndex]);
-            
             return row[colIndex] ? row[colIndex].toLowerCase().includes(word.toLowerCase()): '';
         });
 
         return shouldIncludeRow;
     });
-
-    console.log('filterRan')
-    renderTable(filteredData);
+    return filteredData
 }
 
 // OUTPUT TO SCREEN
