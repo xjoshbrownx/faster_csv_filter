@@ -7,9 +7,9 @@ const excludedWords = new Set();
 function initializeApp() {
     // Initalize app
     document.addEventListener('DOMContentLoaded', () => {
-        loadCSVDataFromLocalStorage().forEach(row => csvData.push(row));
+        loadCSVData().forEach(row => csvData.push(row));
         // const filteredData = [...csvData];
-    
+        
         // If data exists
         if (csvData.length > 0) {
             // Populate Current File Text
@@ -19,9 +19,10 @@ function initializeApp() {
             excludedWords.clear()
             // Populate exludedWords set variable
             
-            loadDataFromLocalStorage('excludedWords').forEach(({word, colIndex}) => {
+            const loadedWords = loadDataFromLocalStorage('excludedWords')
+            if (loadedWords.length) {loadedWords.forEach(({word, colIndex}) => {
                 excludedWords.add({ word, colIndex });
-            });
+            });}
         };
         updateExcludedWordsList();
         filterDataWithExclusions();
@@ -38,8 +39,8 @@ function populateActiveFileElement(filteredRowLength) {
     fileInput.innerHTML = filename;
     fileInputRows = document.getElementById('currentFileRows');
     fileInputRows.textContent = filteredRowLength;
-    // fileInputRows.innerHTML = csvData.length ? csvData.length - 1: 0;
-    // fileInput.className = 'p-2 m-2';
+    originalFileRows = document.getElementById('originalFileRows');
+    originalFileRows.textContent = csvData.length;
 }
 
 function loadCSV(file) {
@@ -52,7 +53,7 @@ function loadCSV(file) {
         csvData.length = 0;
         csvSplit = csv.split('\n')
         csvSplit.map(row => csvData.push(rowSplit(row,','))); // OPTIONS DELIMITER IS FLEXIBLE
-        saveCSVDataToLocalStorage(csvData);
+        storeCSVData(csvData);
         renderTable(csvData);
     };
     reader.readAsText(file);
@@ -186,16 +187,19 @@ function saveDataToLocalStorage(key, value) {
 
 // Function to load CSV data from localStorage 
 // if csv exists else returns empty array
-function loadCSVDataFromLocalStorage() {
+function loadCSVData() {
     const storedData = localStorage.getItem('csvData');
     return storedData ? JSON.parse(storedData) : []
 }
 
 // Function to save CSV data to localStorage 
-function saveCSVDataToLocalStorage(data) {
+function storeCSVData(data) {
     localStorage.setItem('csvData', JSON.stringify(data));
 }
 
+function storeExcludedWords() {
+    saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
+}
 // Function to render table to html on page
 function renderTable(tableData) {
     populateActiveFileElement(tableData.length);
@@ -322,7 +326,9 @@ function filterTable(tableData, wordList) {
 // OUTPUT TO SCREEN
 function updateExcludedWordsList() {
     const excludedWordsList = document.getElementById('excludedWordsList');
+    const excludedControls = document.getElementById('excludedControls');
     excludedWordsList.innerHTML = '';
+    excludedControls.innerHTML = '';
     const excludedWordsText = sidebarBtnGen('h3','Excluded Words:', 'lime-300');
     excludedWordsList.appendChild(excludedWordsText);
     excludedWords.forEach(item => {
@@ -335,8 +341,8 @@ function updateExcludedWordsList() {
     if (excludedWords.size) {
         exportExclude = sidebarBtnGen('div','Export List','lime-400','','click',exportExcludeWords);
         clearExclude = sidebarBtnGen('div','Clear List','red-400','','click',clearExcludeWords);
-        excludedWordsList.appendChild(exportExclude);
-        excludedWordsList.appendChild(clearExclude);
+        excludedControls.appendChild(exportExclude);
+        excludedControls.appendChild(clearExclude);
     } else {
             const importExclude = document.createElement('input');
             importExclude.id = 'excludeListInput';
@@ -348,7 +354,7 @@ function updateExcludedWordsList() {
                 const file = event.target.files[0];
                 importExcludeWords(file);
             }); 
-        excludedWordsList.appendChild(importExclude);  
+            excludedControls.appendChild(importExclude);  
     };
 }
 
@@ -378,10 +384,13 @@ function importExcludeWords(file){
         const csv = event.target.result;
         csvSplit = csv.split('\n');
         csvSplit.map(row => file.push(rowSplit(row,','))); // OPTIONS DELIMITER IS FLEXIBLE
-        file.forEach((word, colIndex) => {
+        file.forEach((item) => {
+            [word, colIndex] = item;
+            console.log(word);
+            console.log(colIndex);
             excludedWords.add({ word, colIndex });
         });
-        saveDataToLocalStorage('excludedWords',excludedWords);
+        storeExcludedWords();
         updateExcludedWordsList();
     };
     reader.readAsText(file);
@@ -403,7 +412,7 @@ function wordElementLogic(item) {
     return function(event) {
         excludedWords.delete(item);
         updateExcludedWordsList();
-        saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
+        storeExcludedWords();
         filterDataWithExclusions(); 
     };
 }

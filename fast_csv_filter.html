@@ -17,7 +17,7 @@
                     <p id="currentFile">No Active File</p>
                 </div>
                 <div id="currentFileTextRight" class="justify-self-end p-2 m-2">
-                    <p><span id="currentFileRows">0</span><span> Rows</span></p>
+                    <p><span id="currentFileRows">0</span><span> Rows Remain from</span><span id="originalFileRows"></span></p>
                 </div>
             </div>
         </div>
@@ -40,12 +40,11 @@
 
         </div> -->
     </div>
-    <div class="p-4 m-4 w-11/12 border border-gray-500 rounded-md" id="excludeSidebar">
-        <div id="excludedWordsList" class="flex flex-wrap">
-            
-        </div>
+    <div class="p-4 m-4 w-11/12 flex flex-row border border-gray-500 rounded-md" id="excludeSidebar">
+        <div id="excludedWordsList" class="w-4/5 flex flex-wrap"></div>
+        <div id="excludedControls" class="w/1/5 flex flex-row p-2"></div>
     </div>
-    <div class="w-11/12 overflow-x-scroll" id="csvTableContainer"></div>
+    <div class="p-4 m-4 w-11/12 rounded-md overflow-x-scroll" id="csvTableContainer"></div>
     
     <script src="appIII.js"></script>
 </body>
