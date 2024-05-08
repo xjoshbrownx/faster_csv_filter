@@ -221,7 +221,7 @@ function renderRow(row, rowIndex, header=false) {
     const tr = document.createElement('tr');
     row.forEach((cell, colIndex) => {
         const td = document.createElement(dtl_el);
-        td.className = `px-4 py-2 ${rowColor}`;
+        td.className = `text-left px-4 py-2 ${rowColor}`;
         // runs cell prep on cell if not header else runs header prep 
         const words = header ? headerPrep(cell) : cellPrep(cell, colIndex);
         // const words = cell;
@@ -420,7 +420,7 @@ function wordElementLogic(item) {
 function sidebarBtnGen(type, text, color='amber-100', className='', event='', func='') {
     const wordButton = document.createElement(type);
     wordButton.textContent = text; 
-    wordButton.className = className ? className : `p-2 m-2 bg-${color} rounded-md`;
+    wordButton.className = className ? className : `px-3 py-2 m-2 bg-${color} rounded-md`;
     if (event) {
         wordButton.addEventListener(event, func);
     }
