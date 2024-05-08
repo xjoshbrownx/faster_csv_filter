@@ -201,7 +201,7 @@ function storeExcludedWords() {
     saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
 }
 // Function to render table to html on page
-function renderTable(tableData) {
+function renderTable(tableData, page) {
     populateActiveFileElement(tableData.length);
     const tableContainer = document.getElementById('csvTableContainer');
     tableContainer.innerHTML = '';
@@ -398,6 +398,17 @@ function importExcludeWords(file){
 
 }
 
+function moduleInstance(id, classNameText) {
+    const screenContainer = document.getElementById('screenContainer');
+    const moduleOuter = document.createElement('div');
+    moduleOuter.id = id;
+    className = classNameText ? classNameText : "p-4 m-4 w-11/12 flex justify-between flex-row border border-gray-500 rounded-md";
+    moduleOuter.className = className;
+    screenContainer.appendChild(moduleOuter);
+    return moduleOuter;
+
+} 
+
 function exportExcludeWords(){
     const csvPrep = [];
     excludedWords.forEach(word => {
@@ -420,7 +431,7 @@ function wordElementLogic(item) {
 function sidebarBtnGen(type, text, color='amber-100', className='', event='', func='') {
     const wordButton = document.createElement(type);
     wordButton.textContent = text; 
-    wordButton.className = className ? className : `px-3 py-2 m-2 bg-${color} rounded-md`;
+    wordButton.className = className ? className : `px-3 py-2 my-2 mx-4 items-center bg-${color} rounded-md`;
     if (event) {
         wordButton.addEventListener(event, func);
     }
