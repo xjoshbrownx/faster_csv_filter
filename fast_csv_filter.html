@@ -7,8 +7,8 @@
     <title>CSV Editor</title>
 </head>
 <body>
-    <div id=screenContainer class="p-4 m-4 w-11/12 bg-lime-200 rounded-md">
-        <div id="controllerContainer" class="flex flex-row items-center">
+    <div class="p-4 m-4 w-11/12 bg-lime-200 rounded-md">
+        <div id="flexBtnContainer" class="flex flex-row items-center">
             <div id="csvController" class="m-1 w-2/5 rounded-md">
                 <input id="csvFileInput" class="p-2 m-2" type="file" accept=".csv">
             </div>
@@ -40,9 +40,9 @@
 
         </div> -->
     </div>
-    <div id="excludemodule" class="p-4 m-4 w-11/12 flex justify-between flex-row border border-gray-500 rounded-md">
-        <div id="excludedWordsList" class="w-4/5 flex py-2 flex-wrap"></div>
-        <div id="excludedControls" class="w/1/5 flex flex-col py-2 items-center border border-gray-500 rounded-md"></div>
+    <div class="p-4 m-4 w-11/12 flex justify-between flex-row border border-gray-500 rounded-md" id="excludeSidebar">
+        <div id="excludedWordsList" class="w-4/5 flex flex-wrap"></div>
+        <div id="excludedControls" class="w/1/5 flex flex-row py-2 border border-gray-500 rounded-md"></div>
     </div>
     <div class="p-4 m-4 w-11/12 rounded-md overflow-x-scroll" id="csvTableContainer"></div>
     
