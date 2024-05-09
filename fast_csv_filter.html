@@ -7,45 +7,6 @@
     <title>CSV Editor</title>
 </head>
 <body>
-    <div id=screenContainer class="p-4 m-4 w-11/12 bg-lime-200 rounded-md">
-        <div id="controllerContainer" class="flex flex-row items-center">
-            <div id="csvController" class="m-1 w-2/5 rounded-md">
-                <input id="csvFileInput" class="p-2 m-2" type="file" accept=".csv">
-            </div>
-            <div class="m-1 w-3/5 bg-lime-600 flex justify-between rounded-md">
-                <div id="currentFileTextLeft" class="justify-self-start p-2 m-2">
-                    <p id="currentFile">No Active File</p>
-                </div>
-                <div id="currentFileTextRight" class="justify-self-end p-2 m-2">
-                    <p><span id="currentFileRows">0</span><span> Rows Remain from</span><span id="originalFileRows"></span></p>
-                </div>
-            </div>
-        </div>
-        <!-- <div id="flexBtnContainer" class="flex flex-row">
-            <div class="m-1 w-1/5 m-2 bg-lime-400 border border-gray-500 rounded-md">
-                <button class="p-2 m-2" id="hideColumnBtn">Hide Column</button>
-            </div>
-            <div class="m-1 w-1/5 m-2 bg-lime-400 border border-gray-500 rounded-md">
-                <button class="p-2 m-2" id="sortBtn">Options</button>
-            </div>
-            <div class="m-1 w-1/5 m-2 border border-gray-500 bg-lime-400 rounded-md">
-                <button class="p-2 m-2" id="exportBtn">Undo</button>
-            </div>
-            <div class="m-1 w-1/5 m-2 border border-gray-500 bg-lime-400 rounded-md">
-                <button class="p-2 m-2" id="exportBtn">Redo</button>
-            </div>
-            <div class="m-1 w-2/5 m-2 border border-gray-500 bg-lime-300 rounded-md">
-                <input class="p-2 m-2 bg-lime-300" type="text" id="filterInput" placeholder="Enter keyword to filter by">
-            </div>
-
-        </div> -->
-    </div>
-    <div id="excludemodule" class="p-4 m-4 w-11/12 flex justify-between flex-row border border-gray-500 rounded-md">
-        <div id="excludedWordsList" class="w-4/5 flex py-2 flex-wrap"></div>
-        <div id="excludedControls" class="w/1/5 flex flex-col py-2 items-center border border-gray-500 rounded-md"></div>
-    </div>
-    <div class="p-4 m-4 w-11/12 rounded-md overflow-x-scroll" id="csvTableContainer"></div>
-    
     <script src="appIII.js"></script>
 </body>
 </html>
