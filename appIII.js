@@ -10,8 +10,9 @@ let border = 'border border-gray-500';
 let overflow = 'overflow-x-scroll';
 let brightness = 400;
 let contrast = 200;
+const color_choices = ['Zinc','Yellow','Violet','Teal','Stone','Slate','Sky','Rose','Red','Purple','Pink','Orange','Neutral','Lime','Indigo','Green','Gray','Fuchsia','Emerald','Cyan','Blue','Amber'];
 
-
+// ADD INDEX FUNCTIONALITY
 // let filteredRowLength = 0;
 
 function initializeApp() {
@@ -47,9 +48,9 @@ function populateActiveFileElement(filteredRowLength) {
     filename = loadDataFromLocalStorage('filename');
     // filename = filename.length ? filename : "No File Active"
     fileInput = document.getElementById('currentFile');
-    fileInput.innerHTML = filename;
+    fileInput.textContent = filename;
     fileInputRows = document.getElementById('currentFileRows');
-    fileInputRows.textContent = filteredRowLength;
+    fileInputRows.textContent = `${filteredRowLength} rows of `;
     originalFileRows = document.getElementById('originalFileRows');
     originalFileRows.textContent = csvData.length;
 }
@@ -168,8 +169,17 @@ function saveDataToLocalStorage(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
 }
 
-function storeSetToLocalStorage(name, setData) {
+function saveSetToLocalStorage(name, setData) {
     saveDataToLocalStorage(name,Array.from(setData));
+}
+
+function loadSetFromLocatStorage(name) {
+    const loadedSet = loadDataFromLocalStorage(name)
+    const outSet = new Set();
+    if (loadedSet.length) {loadedSet.forEach(({key, value}) => {
+        outSet.add({ key, value });
+    });}
+    return outSet;
 }
 
 // Function to load CSV data from localStorage 
@@ -201,13 +211,6 @@ function storeExcludedWords() {
 }
 
 // HTML RENDERING AND CONTROL
-
-function colorChange(color) {
-    headerContainer = getElementById("headerContainer");
-    headerContainer.className = `bg-${color}-200 p-4 m-4 w-11/12 ${rounded}`;
-    currentFileContainer = getElementById("currentFileContainer");
-    currentFileContainer.className = `bg-${color}-600 m-1 w-3/5 flex justify-between ${rounded}`
-}
 
 function fileManagementUI() {
     const body = document.getElementsByTagName('body');
@@ -255,19 +258,68 @@ function toolsContainerUI() {
     const toolContainer = document.createElement('div');
     toolContainer.id = "toolContainer";
     toolContainer.className = "flex flex-row items-center"; 
-    const hideColumnBtn = document.createElement('div');
-    hideColumnBtn.id = 'hideColumnBtn';
-    hideColumnBtn.className = '"p-2 m-2';
-    hideColumnBtn.textContent = 'Hide Column';
-    const optionsBtn = toolBtnGen('optionsBtn','Options',optionBtnAction);
-    optionsBtn.id = 'optionsBtn';
-    optionsBtn
-    optionsBtn.textContent = 'Options';
+    // const hideColumnBtn = document.createElement('div');
+    // hideColumnBtn.id = 'hideColumnBtn';
+    // hideColumnBtn.className = 'p-2 m-2';
+    // hideColumnBtn.textContent = 'Hide Column';
+    const hideColumnBtn = toolBtnGen('hideColumnBtn','w-1/5','Show/Hide Columns',hideColAction);
+    const optionsBtn = toolBtnGen('optionsBtn','w-1/5','Options',optionBtnAction);
+    const addModuleBtn = toolBtnGen('addModuleBtn','w-1/5','Add Module',addModuleBtnAction);    
+    toolContainer.appendChild(hideColumnBtn);
+    toolContainer.appendChild(optionsBtn);
+    toolContainer.appendChild(addModuleBtn);
     return toolContainer;
 }
 
 function optionBtnAction() {
     //ADD CODE TO TAKE ACTION ON OPTIONS
+    const headerContainer = document.getElementById('headerContainer');
+    const optionContainer = document.createElement('div');
+    optionContainer.className = 'flex flex-row items-center overflow-wrap';
+    optionContainer.id = 'optionContainer';
+    const pickMainClrBtn = toolBtnGen('pickMainClrBtn','w-1/5','Main Color', pickMainClrAction);
+    const pickAccentClrBtn = toolBtnGen('pickAccentClrBtn','w-1/5','Accent Color', pickAccentClrAction);
+    optionContainer.appendChild(pickMainClrBtn);
+    optionContainer.appendChild(pickAccentClrBtn);
+    headerContainer.appendChild(optionContainer);
+    return '';
+}
+
+function pickAccentClrAction() {
+    console.log('pick accent color btn');
+    return '';
+}
+
+function pickMainClrAction() {
+    console.log('pick main color btn');
+    return '';
+}
+
+
+function pickColorUI() {
+    const pickColor = document.createElement('div');
+    pickColor.id = 'pickClrContainer';
+    pickColor.className = 'flex flex-row items-center overflow-wrap w-11/12'
+    color_choices.forEach(color => {
+        pickColor.appendChild(colorBtn(color));
+    });
+    return pickColor;
+}
+
+function colorChoiceUI(color, callback) {
+    const colorBtn = document.createElement('button');
+    colorBtn.className = `rounded-full bg-${color}-500`;
+    colorBtn.id = `colorBtn-${color}`;
+    colorBtn.addEventListener('click', callback);
+    return colorBtn;
+
+}
+
+function hideColAction() {
+    return ''
+}
+
+function addModuleBtnAction() {
     return ''
 }
 
@@ -297,9 +349,9 @@ function refreshColors(newColor, newBrightness, newContrast) {
     contrast = newContrast;
 }
 
-function toolBtnGen(id, label,callback) {
+function toolBtnGen(id, width, label,callback) {
     const div = document.createElement('div');;
-    div.className = `m-1 w-1/5 m-2 bg-${mainColor}-${getMidClrVal()} ${border} ${rounded}`;
+    div.className = `m-2 ${width} bg-${mainColor}-${getMidClrVal()} ${border} ${rounded}`;
     const button = document.createElement('button');
     button.id = id;
     button.className = '"p-2 m-2';
@@ -508,6 +560,7 @@ function cellPrep(cell, colIndex, trunc=2) {
             wordSpan.addEventListener('click', () => {
                 // const columnIndex = row.indexOf(cell); // Get the column index of the clicked word
                 excludedWords.add({ word, colIndex }); // Add word and column index to excludedWords Set
+                // saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
                 saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
                 updateExcludedWordsList();
                 filterDataWithExclusions();
@@ -654,3 +707,11 @@ initializeApp()
 
  
 
+// LEFTOVERS
+
+// function colorChange(color) {
+//     headerContainer = getElementById("headerContainer");
+//     headerContainer.className = `bg-${color}-200 p-4 m-4 w-11/12 ${rounded}`;
+//     currentFileContainer = getElementById("currentFileContainer");
+//     currentFileContainer.className = `bg-${color}-600 m-1 w-3/5 flex justify-between ${rounded}`
+// }
