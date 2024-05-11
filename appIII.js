@@ -8,6 +8,9 @@ let warningColor = 'red';
 let rounded = 'rounded-md';
 let border = 'border border-gray-500';
 let overflow = 'overflow-x-scroll';
+let brightness = 400;
+let contrast = 200;
+
 
 // let filteredRowLength = 0;
 
@@ -151,8 +154,9 @@ function exportCSV(filename, tableData) {
 
 // LOCAL STORAGE FUNCTIONS
 
-// Function to load CSV data from localStorage 
-// if csv exists else returns empty array
+
+// if csv exists load CSV data from localStorage 
+// else returns empty array
 function loadDataFromLocalStorage(key) {
     const storedData = localStorage.getItem(key);
     return storedData ? JSON.parse(storedData) : []
@@ -162,6 +166,22 @@ function loadDataFromLocalStorage(key) {
 function saveDataToLocalStorage(key, value) {
     // if (typeof value === 'set') {value=Array.from(value);}
     localStorage.setItem(key, JSON.stringify(value));
+}
+
+function storeSetToLocalStorage(name, setData) {
+    saveDataToLocalStorage(name,Array.from(setData));
+}
+
+// Function to load CSV data from localStorage 
+// if csv exists else returns empty array
+function loadArrayFromLocalStorage(name) {
+    const storedData = localStorage.getItem(name);
+    return storedData ? JSON.parse(storedData) : []
+}
+
+function saveArrayToLocalStorage(name, arrData) {
+    // if (typeof value === 'set') {value=Array.from(value);}
+    localStorage.setItem(name, JSON.stringify(arrData));
 }
 
 // Function to load CSV data from localStorage 
@@ -215,7 +235,7 @@ function moduleInstance(id, classNameText) {
 function headerContainerUI() {
     const headerContainer = document.createElement('div');
     headerContainer.id = 'headerContainer';
-    headerContainer.className = `bg-${mainColor}-200 p-4 m-4 w-11/12 ${rounded}`;
+    headerContainer.className = `bg-${mainColor}-${getLowClrVal()} p-4 m-4 w-11/12 ${rounded}`;
     const controllerContainer = document.createElement('div');
     controllerContainer.id = "controllerContainer";
     controllerContainer.className = "flex flex-row items-center"; 
@@ -251,9 +271,35 @@ function optionBtnAction() {
     return ''
 }
 
+function refreshColors(newColor, newBrightness, newContrast) {
+    let oldLowClr = `bg-${mainColor}-${getLowClrVal()}`;
+    let oldMidClr = `bg-${mainColor}-${getMidClrVal()}`;
+    let oldHighClr = `bg-${mainColor}-${getHighClrVal()}`;
+    let newLowClr = `bg-${newColor}-${newBrightness-newContrast}`;
+    let newMidClr = `bg-${newColor}-${newBrightness}`;
+    let newHighClr = `bg-${newColor}-${newBrightness+newContrast}`;
+
+    lowList = document.getElementsByClassName(oldLowClr);
+    midList = document.getElementsByClassName(oldMidClr);
+    highList = document.getElementsByClassName(oldHighClr);
+
+    if (lowList) Array.from(lowList).forEach(element => {
+        element.className = element.className.replace(oldLowClr,newLowClr);
+    })
+    if (midList) Array.from(midList).forEach(element => {
+        element.className = element.className.replace(oldMidClr,newMidClr);
+    })
+    if (highList) Array.from(highList).forEach(element => {
+        element.className = element.className.replace(oldHighClr,newHighClr);
+    })
+    mainColor = newColor;
+    brightness = newBrightness;
+    contrast = newContrast;
+}
+
 function toolBtnGen(id, label,callback) {
     const div = document.createElement('div');;
-    div.className = `m-1 w-1/5 m-2 bg-${mainColor}-400 ${border} ${rounded}`;
+    div.className = `m-1 w-1/5 m-2 bg-${mainColor}-${getMidClrVal()} ${border} ${rounded}`;
     const button = document.createElement('button');
     button.id = id;
     button.className = '"p-2 m-2';
@@ -286,7 +332,7 @@ function csvControllerUI() {
 function currentFileContainerUI() {
     const currentFileContainer = document.createElement('div');
     currentFileContainer.id = 'currentFileContainer';
-    currentFileContainer.className = `"m-1 w-3/5 bg-${mainColor}-600 flex justify-between ${rounded}`;
+    currentFileContainer.className = `"m-1 w-3/5 bg-${mainColor}-${getHighClrVal()} flex justify-between ${rounded}`;
     const currentFileTextLeft = document.createElement('div');
     currentFileTextLeft.id = 'currentFileTextLeft';
     currentFileTextLeft.className = `justify-self-start p-2 m-2`;
@@ -335,6 +381,18 @@ function csvTableContainerUI() {
     return csvTableContainer;
 }
 
+function getLowClrVal() {
+    return brightness - contrast;
+}
+
+function getHighClrVal() {
+    return brightness + contrast;
+}
+
+function getMidClrVal() {
+    return brightness;
+}
+
 // TABLE FORMATTING
 
 function rowSplit(row, delimiter) {
@@ -381,7 +439,7 @@ function renderTable(tableData, page) {
 }
 
 function renderRow(row, rowIndex, header=false) {
-    rowColor = rowIndex % 2 ? `bg-${mainColor}-100` : `bg-${mainColor}-200`;
+    rowColor = rowIndex % 2 ? `bg-${mainColor}-${getLowClrVal()-100}` : `bg-${mainColor}-${getLowClrVal()}`;
     dtl_el = header ? 'th' : 'td' //detail element is table header or table detail
     const tr = document.createElement('tr');
     row.forEach((cell, colIndex) => {
@@ -441,7 +499,7 @@ function cellPrep(cell, colIndex, trunc=2) {
             wordSpan.style.cursor = 'pointer'; // Set cursor to pointer for clickable effect
             wordSpan.addEventListener('mouseover', () => {
                 // wordSpan.style.backgroundColor = '#ed8936'; // Highlight on hover
-                wordSpan.className = `p-2 border bg-${mainColor}-300 ${rounded}` //OPTIONS
+                wordSpan.className = `p-2 border bg-${mainColor}-${getMidClrVal()} ${rounded}` //OPTIONS
             });
             wordSpan.addEventListener('mouseout', () => {
                 // wordSpan.style.backgroundColor = ''; // Remove highlight on mouseout
@@ -494,18 +552,18 @@ function updateExcludedWordsList() {
     const excludedControls = document.getElementById('excludedControls');
     excludedWordsList.innerHTML = '';
     excludedControls.innerHTML = '';
-    const excludedWordsText = sidebarBtnGen('h3','Excluded Words:', `${mainColor}-300`);
+    const excludedWordsText = sidebarBtnGen('h3','Excluded Words:', `bg-${mainColor}-${getMidClrVal()}`);
     excludedWordsList.appendChild(excludedWordsText);
     excludedWords.forEach(item => {
         // const {word, colIndex} = item;
         let text = `${item.word} (${csvData[0][item.colIndex]})`;
         let eventFunc = wordElementLogic(item);
-        const wordElement = sidebarBtnGen('div',text, `${mainColor}-100`, '', 'click', eventFunc);
+        const wordElement = sidebarBtnGen('div',text, `bg-${accentColor}-${getLowClrVal()}`, '', 'click', eventFunc);
         excludedWordsList.appendChild(wordElement);
     });
     if (excludedWords.size) {
-        exportExclude = sidebarBtnGen('div','Export List',`${mainColor}-400`,'','click',exportExcludeWords);
-        clearExclude = sidebarBtnGen('div','Clear List',`${warningColor}-500`,'','click',clearExcludeWords);
+        exportExclude = sidebarBtnGen('div','Export List',`bg-${mainColor}-${getMidClrVal()}`,'','click',exportExcludeWords);
+        clearExclude = sidebarBtnGen('div','Clear List',`bg-${warningColor}-500`,'','click',clearExcludeWords);
         excludedControls.appendChild(exportExclude);
         excludedControls.appendChild(clearExclude);
     } else {
@@ -582,10 +640,10 @@ function wordElementLogic(item) {
     };
 }
 
-function sidebarBtnGen(type, text, color='amber-100', className='', event='', func='') {
+function sidebarBtnGen(type, text, color='bg-amber-100', className='', event='', func='') {
     const wordButton = document.createElement(type);
     wordButton.textContent = text; 
-    wordButton.className = className ? className : `px-3 py-2 my-2 mx-4 items-center bg-${color} ${rounded}`;
+    wordButton.className = className ? className : `px-3 py-2 my-2 mx-4 items-center ${color} ${rounded}`;
     if (event) {
         wordButton.addEventListener(event, func);
     }
