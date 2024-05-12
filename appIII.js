@@ -10,6 +10,7 @@ let border = 'border border-gray-500';
 let overflow = 'overflow-x-scroll';
 let brightness = 400;
 let contrast = 200;
+let toolDrawer = 0;
 const color_choices = ['Zinc','Yellow','Violet','Teal','Stone','Slate','Sky','Rose','Red','Purple','Pink','Orange','Neutral','Lime','Indigo','Green','Gray','Fuchsia','Emerald','Cyan','Blue','Amber'];
 
 // ADD INDEX FUNCTIONALITY
@@ -18,12 +19,16 @@ const color_choices = ['Zinc','Yellow','Violet','Teal','Stone','Slate','Sky','Ro
 function initializeApp() {
     // Initalize app
     document.addEventListener('DOMContentLoaded', () => {
+        loadInterfaceOptionsFromLocalStorage();
         fileManagementUI();
         loadCSVData().forEach(row => csvData.push(row));
         // const filteredData = [...csvData];
+        // mainColorLoad = localStorage.getItem('mainColor');
         
         // If data exists
         if (csvData.length > 0) {
+            // Populate Tool Drawer Setting
+            localStorage.getItem('toolDrawer');
             // Populate Current File Text
             populateActiveFileElement();
             // Replace file picker with clear and export options
@@ -36,6 +41,9 @@ function initializeApp() {
                 excludedWords.add({ word, colIndex });
             });}
         };
+        if (toolDrawer) {
+            toggleToolDrawerUI();
+        }
         updateExcludedWordsList();
         filterDataWithExclusions();
         // renderTable(csvData);
@@ -77,24 +85,12 @@ function swapFileOptions() {
     if (csvController.getElementsByTagName('input').length) {
         csvController.className = 'flex flex-row m-1 w-2/5'
         csvController.innerHTML = '';
-        clearDiv = document.createElement('div');
-        clearDiv.className = `m-1 w-1/2 m-2 ${border} ${rounded}`;
-        clearBtn = document.createElement('button');
-        clearBtn.id = 'clearData'
-        clearBtn.className = 'p-2 m-2'
-        clearBtn.textContent = 'Clear Data'
-        clearBtn.addEventListener('click', clearData);
-        clearDiv.appendChild(clearBtn)
-        exportDiv = document.createElement('div');
-        exportDiv.className = `m-1 w-1/2 m-2 ${border} ${rounded}`;
-        exportBtn = document.createElement('button');   
-        exportBtn.id = 'exportData'
-        exportBtn.className = 'p-2 m-2'
-        exportBtn.textContent = 'Export CSV'
-        exportBtn.addEventListener('click', exportFilteredCSV);
-        exportDiv.appendChild(exportBtn)
-        csvController.appendChild(clearDiv);
-        csvController.appendChild(exportDiv);    
+        const clearBtn = toolBtnGen('clearData','main','w-1/3','Clear Data',clearData);
+        const exportBtn = toolBtnGen('exportData','main','w-1/3','Export CSV',exportFilteredCSV);
+        const toolHideBtn = toolBtnGen('toolHideBtn','main','w-1/3','Show Tools',toggleToolDrawerUI);
+        csvController.appendChild(clearBtn);
+        csvController.appendChild(exportBtn); 
+        csvController.appendChild(toolHideBtn);   
     } else if (csvController.getElementsByTagName('div').length) {
         csvController.innerHTML = '';
         const inputFile = document.createElement('input');
@@ -111,6 +107,8 @@ function swapFileOptions() {
     }
     
 }
+
+
 
 // clears filename, csvdata, excluded words from local storage and from page
 function clearData() {
@@ -155,6 +153,40 @@ function exportCSV(filename, tableData) {
 
 // LOCAL STORAGE FUNCTIONS
 
+function loadToolDrawerSetting() {
+    tempTool = localStorage.getItem('toolDrawer');
+    toolDrawer = tempTool ? tempTool : toolDrawer;
+}
+
+function loadInterfaceOptionsFromLocalStorage() {
+    tempMainColor = localStorage.getItem('mainColor');
+    mainColor = tempMainColor ? tempMainColor : mainColor;  
+    tempAccentColor = localStorage.getItem('accentColor');
+    accentColor = tempAccentColor ? tempAccentColor : accentColor;
+    tempWarningColor = localStorage.getItem('warningColor');
+    warningColor = tempWarningColor ? tempWarningColor : warningColor;
+    tempRounded = localStorage.getItem('rounded');
+    rounded = tempRounded ? tempRounded : rounded;
+    tempBorder = localStorage.getItem('border');
+    border = tempBorder ? tempBorder : border;
+    tempOverflow = localStorage.getItem('overflow');
+    overflow = tempOverflow ? tempOverflow : overflow;
+    tempBrightness = localStorage.getItem('brightness');
+    brightness = tempBrightness ? tempBrightness : brightness;
+    tempContrast = localStorage.getItem('tempContrast');
+    contrast = tempContrast ? tempContrast : contrast;
+}
+
+function saveInterfaceOptionsToLocalStorage() {
+    localStorage.setItem('mainColor',mainColor);
+    localStorage.setItem('accentColor',accentColor);
+    localStorage.setItem('warningColor',warningColor);
+    localStorage.setItem('rounded',rounded);
+    localStorage.setItem('border',border);
+    localStorage.setItem('overflow',overflow);
+    localStorage.setItem('brightness',brightness);
+    localStorage.setItem('tempContrast',contrast);
+}
 
 // if csv exists load CSV data from localStorage 
 // else returns empty array
@@ -164,6 +196,15 @@ function loadDataFromLocalStorage(key) {
 }
 
 // Function to save CSV data to localStorage 
+function loadValueFromLocalStorage(key, value) {
+    temp = localStorage.getItem(key);
+    value = temp ? temp : value; 
+}
+
+function saveValueToLocalStorage(key, value) {
+    localStorage.setItem(key, value);
+}
+
 function saveDataToLocalStorage(key, value) {
     // if (typeof value === 'set') {value=Array.from(value);}
     localStorage.setItem(key, JSON.stringify(value));
@@ -244,45 +285,53 @@ function headerContainerUI() {
     controllerContainer.className = "flex flex-row items-center"; 
     const csvController = csvControllerUI();
     const currentFileContainer = currentFileContainerUI();
-    const toolsContainer = toolsContainerUI();
+    const toolContainer = toolContainerUI();
+    const optionContainer = createOptionContainerUI();
+
     // ASSEMBLE STRUCTURE 
 
     controllerContainer.appendChild(csvController);
     controllerContainer.appendChild(currentFileContainer);
     headerContainer.appendChild(controllerContainer);
-    headerContainer.appendChild(toolsContainer);
+    headerContainer.appendChild(toolContainer);
+    headerContainer.appendChild(optionContainer);
     return headerContainer;
 }
 
-function toolsContainerUI() {
+function toolContainerUI() {
     const toolContainer = document.createElement('div');
     toolContainer.id = "toolContainer";
     toolContainer.className = "flex flex-row items-center"; 
-    // const hideColumnBtn = document.createElement('div');
-    // hideColumnBtn.id = 'hideColumnBtn';
-    // hideColumnBtn.className = 'p-2 m-2';
-    // hideColumnBtn.textContent = 'Hide Column';
-    const hideColumnBtn = toolBtnGen('hideColumnBtn','w-1/5','Show/Hide Columns',hideColAction);
-    const optionsBtn = toolBtnGen('optionsBtn','w-1/5','Options',optionBtnAction);
-    const addModuleBtn = toolBtnGen('addModuleBtn','w-1/5','Add Module',addModuleBtnAction);    
-    toolContainer.appendChild(hideColumnBtn);
-    toolContainer.appendChild(optionsBtn);
-    toolContainer.appendChild(addModuleBtn);
+    if (toolDrawer) {populateToolContainer()} 
     return toolContainer;
 }
 
-function optionBtnAction() {
-    //ADD CODE TO TAKE ACTION ON OPTIONS
-    const headerContainer = document.getElementById('headerContainer');
+function createOptionContainerUI() {
+    // const headerContainer = document.getElementById('headerContainer');    
     const optionContainer = document.createElement('div');
-    optionContainer.className = 'flex flex-row items-center overflow-wrap';
     optionContainer.id = 'optionContainer';
-    const pickMainClrBtn = toolBtnGen('pickMainClrBtn','w-1/5','Main Color', pickMainClrAction);
-    const pickAccentClrBtn = toolBtnGen('pickAccentClrBtn','w-1/5','Accent Color', pickAccentClrAction);
+    optionContainer.className = 'flex flex-row items-center overflow-wrap';
+    // headerContainer.appendChild(optionContainer);
+    return optionContainer;
+}
+
+function optionBtnAction() {
+    //TOGGLES OPTIONS
+    const optionContainer = document.getElementById('optionContainer');
+    if (optionContainer.innerHTML.length>0) {
+        optionContainer.innerHTML = '';
+    } else {
+        openOptionDrawer();
+    };
+    return '';
+}
+
+function openOptionDrawer() {
+    const optionContainer = document.getElementById('optionContainer');
+    const pickMainClrBtn = toolBtnGen('pickMainClrBtn','main','w-1/5','Main Color', pickMainClrAction);
+    const pickAccentClrBtn = toolBtnGen('pickAccentClrBtn','accent','w-1/5','Accent Color', pickAccentClrAction);
     optionContainer.appendChild(pickMainClrBtn);
     optionContainer.appendChild(pickAccentClrBtn);
-    headerContainer.appendChild(optionContainer);
-    return '';
 }
 
 function pickAccentClrAction() {
@@ -295,6 +344,26 @@ function pickMainClrAction() {
     return '';
 }
 
+function toggleToolDrawerUI() {
+    toolDrawer ? closeToolDrawerUI() : openToolDrawerUI()
+    toolDrawer = toolDrawer ? 0 : 1;
+}
+
+function openToolDrawerUI() {
+    toolContainer = document.getElementById("toolContainer");
+    const hideColumnBtn = toolBtnGen('hideColumnBtn','main','w-1/5','Show/Hide Columns',hideColAction);
+    const optionsBtn = toolBtnGen('optionsBtn','main','w-1/5','Options',optionBtnAction);
+    const addModuleBtn = toolBtnGen('addModuleBtn','main','w-1/5','Add Module',addModuleBtnAction);    
+    toolContainer.appendChild(hideColumnBtn);
+    toolContainer.appendChild(optionsBtn);
+    toolContainer.appendChild(addModuleBtn);
+}
+
+
+function closeToolDrawerUI() {
+    toolContainer = document.getElementById('toolContainer');
+    toolContainer.innerHTML = '';
+}
 
 function pickColorUI() {
     const pickColor = document.createElement('div');
@@ -349,12 +418,28 @@ function refreshColors(newColor, newBrightness, newContrast) {
     contrast = newContrast;
 }
 
-function toolBtnGen(id, width, label,callback) {
+function toolBtnGen(id, color, width, label, callback) {
+    switch (color) {
+        case 'main':
+            color = `bg-${mainColor}-${getMidClrVal()}`;
+            console.log('main color');
+        case 'accent':
+            color = `bg-${accentColor}-${getMidClrVal()}`;
+            console.log('accent color');
+        case 'warning':
+            color = `bg-${warningColor}-${getMidClrVal()}`;
+        case 'clear':
+            color = `bg-inherit`;
+        default:
+            color = `bg-${mainColor}-${getMidClrVal()}`;
+    }
+
     const div = document.createElement('div');;
-    div.className = `m-2 ${width} bg-${mainColor}-${getMidClrVal()} ${border} ${rounded}`;
+    div.id = `${id}-div`
+    div.className = `m-2 grid justify-items-center ${width} ${color} ${border} ${rounded}`;
     const button = document.createElement('button');
     button.id = id;
-    button.className = '"p-2 m-2';
+    button.className = '"p-2 m-2 text-center';
     button.textContent = label;
     button.addEventListener('click', function(event) {
         callback();
