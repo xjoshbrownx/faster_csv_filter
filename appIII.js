@@ -85,9 +85,9 @@ function swapFileOptions() {
     if (csvController.getElementsByTagName('input').length) {
         csvController.className = 'flex flex-row m-1 w-2/5'
         csvController.innerHTML = '';
-        const clearBtn = toolBtnGen('clearData','main','w-1/3','Clear Data',clearData);
-        const exportBtn = toolBtnGen('exportData','main','w-1/3','Export CSV',exportFilteredCSV);
-        const toolHideBtn = toolBtnGen('toolHideBtn','main','w-1/3','Show Tools',toggleToolDrawerUI);
+        const clearBtn = toolBtnGen(id='clearData',color='main',width='w-1/3',label='Clear Data',callback=clearData);
+        const exportBtn = toolBtnGen(id='exportData',color='main',width='w-1/3',label='Export CSV',callback=exportFilteredCSV);
+        const toolHideBtn = toolBtnGen(id='toolHideBtn',color='main',width='w-1/3',label='Show Tools',callback=toggleToolDrawerUI);
         csvController.appendChild(clearBtn);
         csvController.appendChild(exportBtn); 
         csvController.appendChild(toolHideBtn);   
@@ -328,8 +328,8 @@ function optionBtnAction() {
 
 function openOptionDrawer() {
     const optionContainer = document.getElementById('optionContainer');
-    const pickMainClrBtn = toolBtnGen('pickMainClrBtn','main','w-1/5','Main Color', pickMainClrAction);
-    const pickAccentClrBtn = toolBtnGen('pickAccentClrBtn','accent','w-1/5','Accent Color', pickAccentClrAction);
+    const pickMainClrBtn = toolBtnGen(id='pickMainClrBtn',color='main',width='w-1/5',label='Main Color', callback=pickMainClrAction);
+    const pickAccentClrBtn = toolBtnGen(id='pickAccentClrBtn',color='accent',width='w-1/5',label='Accent Color', callback=pickAccentClrAction);
     optionContainer.appendChild(pickMainClrBtn);
     optionContainer.appendChild(pickAccentClrBtn);
 }
@@ -351,9 +351,9 @@ function toggleToolDrawerUI() {
 
 function openToolDrawerUI() {
     toolContainer = document.getElementById("toolContainer");
-    const hideColumnBtn = toolBtnGen('hideColumnBtn','main','w-1/5','Show/Hide Columns',hideColAction);
-    const optionsBtn = toolBtnGen('optionsBtn','main','w-1/5','Options',optionBtnAction);
-    const addModuleBtn = toolBtnGen('addModuleBtn','main','w-1/5','Add Module',addModuleBtnAction);    
+    const hideColumnBtn = toolBtnGen(id='hideColumnBtn',color='main',width='w-1/5',label='Show/Hide Columns',callback=hideColAction);
+    const optionsBtn = toolBtnGen(id='optionsBtn',color='main',width='w-1/5',label='Options',callback=optionBtnAction);
+    const addModuleBtn = toolBtnGen(id='addModuleBtn',color='main',width='w-1/5',label='Add Module',callback=addModuleBtnAction);    
     toolContainer.appendChild(hideColumnBtn);
     toolContainer.appendChild(optionsBtn);
     toolContainer.appendChild(addModuleBtn);
@@ -393,6 +393,7 @@ function addModuleBtnAction() {
 }
 
 function refreshColors(newColor, newBrightness, newContrast) {
+    
     let oldLowClr = `bg-${mainColor}-${getLowClrVal()}`;
     let oldMidClr = `bg-${mainColor}-${getMidClrVal()}`;
     let oldHighClr = `bg-${mainColor}-${getHighClrVal()}`;
@@ -418,25 +419,30 @@ function refreshColors(newColor, newBrightness, newContrast) {
     contrast = newContrast;
 }
 
-function toolBtnGen(id, color, width, label, callback) {
+function toolBtnGen(id, color='main', width='w-1/5', label='', callback, height='h-14') {
     switch (color) {
         case 'main':
-            color = `bg-${mainColor}-${getMidClrVal()}`;
-            console.log('main color');
+            color_swtch = `bg-${mainColor}-${getMidClrVal()}`;
+            console.log(`${id}:${mainColor}`);
+            break;
         case 'accent':
-            color = `bg-${accentColor}-${getMidClrVal()}`;
-            console.log('accent color');
+            color_swtch = `bg-${accentColor}-${getMidClrVal()}`;
+            console.log(`${id}:${accentColor}`);
+            break;
         case 'warning':
-            color = `bg-${warningColor}-${getMidClrVal()}`;
+            color_swtch = `bg-${warningColor}-${getMidClrVal()}`;
+            break;
         case 'clear':
-            color = `bg-inherit`;
+            color_swtch = `bg-inherit`;
+            break;
         default:
-            color = `bg-${mainColor}-${getMidClrVal()}`;
+            color_swtch = `bg-${mainColor}-${getMidClrVal()}`;
+            break;
     }
 
     const div = document.createElement('div');;
     div.id = `${id}-div`
-    div.className = `m-2 grid justify-items-center ${width} ${color} ${border} ${rounded}`;
+    div.className = `m-2 grid justify-items-center ${height} ${width} ${color_swtch} ${border} ${rounded}`;
     const button = document.createElement('button');
     button.id = id;
     button.className = '"p-2 m-2 text-center';
@@ -690,13 +696,15 @@ function updateExcludedWordsList() {
     const excludedControls = document.getElementById('excludedControls');
     excludedWordsList.innerHTML = '';
     excludedControls.innerHTML = '';
-    const excludedWordsText = sidebarBtnGen('h3','Excluded Words:', `bg-${mainColor}-${getMidClrVal()}`);
+    // const excludedWordsText = sidebarBtnGen('h3','Excluded Words:', `bg-${mainColor}-${getMidClrVal()}`);
+    const excludedWordsText = toolBtnGen('excludedWordsText','main','w-1/5','Excluded Words');
     excludedWordsList.appendChild(excludedWordsText);
     excludedWords.forEach(item => {
         // const {word, colIndex} = item;
         let text = `${item.word} (${csvData[0][item.colIndex]})`;
         let eventFunc = wordElementLogic(item);
-        const wordElement = sidebarBtnGen('div',text, `bg-${accentColor}-${getLowClrVal()}`, '', 'click', eventFunc);
+        const wordElement = toolBtnGen(id=`word_el_${text}`,color='accent',width='w-1/5', label=text,callback=eventFunc);
+        // const wordElement = sidebarBtnGen('div',text, `bg-${accentColor}-${getMidClrVal()}`, '', 'click', eventFunc);
         excludedWordsList.appendChild(wordElement);
     });
     if (excludedWords.size) {
@@ -778,7 +786,7 @@ function wordElementLogic(item) {
     };
 }
 
-function sidebarBtnGen(type, text, color='bg-amber-100', className='', event='', func='') {
+function sidebarBtnGen(type, text, color='bg-amber-500', className='', event='', func='') {
     const wordButton = document.createElement(type);
     wordButton.textContent = text; 
     wordButton.className = className ? className : `px-3 py-2 my-2 mx-4 items-center ${color} ${rounded}`;
