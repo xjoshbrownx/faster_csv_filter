@@ -258,11 +258,13 @@ function fileManagementUI() {
     const headerContainer = headerContainerUI();
     const excludeModule = excludeModuleUI();
     const csvTableContainer = csvTableContainerUI();
+    const optionScreen = createModalPopupUI();
 
     // ASSEMBLE STRUCTURE    
     body[0].appendChild(headerContainer);
     body[0].appendChild(excludeModule);
     body[0].appendChild(csvTableContainer);
+    body[0].appendChild(optionScreen);
 }
 
 function moduleInstance(id, classNameText) {
@@ -279,14 +281,13 @@ function moduleInstance(id, classNameText) {
 function headerContainerUI() {
     const headerContainer = document.createElement('div');
     headerContainer.id = 'headerContainer';
-    headerContainer.className = `bg-${mainColor}-${getLowClrVal()} p-4 m-4 w-11/12 ${rounded}`;
+    headerContainer.className = `bg-${mainColor}-${getHighClrVal()} p-4 m-4 w-11/12 ${rounded}`;
     const controllerContainer = document.createElement('div');
     controllerContainer.id = "controllerContainer";
     controllerContainer.className = "flex flex-row items-center"; 
     const csvController = csvControllerUI();
     const currentFileContainer = currentFileContainerUI();
     const toolContainer = toolContainerUI();
-    const optionContainer = createOptionContainerUI();
 
     // ASSEMBLE STRUCTURE 
 
@@ -294,7 +295,8 @@ function headerContainerUI() {
     controllerContainer.appendChild(currentFileContainer);
     headerContainer.appendChild(controllerContainer);
     headerContainer.appendChild(toolContainer);
-    headerContainer.appendChild(optionContainer);
+    // headerContainer.appendChild(optionScreen);
+
     return headerContainer;
 }
 
@@ -306,40 +308,65 @@ function toolContainerUI() {
     return toolContainer;
 }
 
-function createOptionContainerUI() {
+function createModalPopupUI() {
     // const headerContainer = document.getElementById('headerContainer');    
-    const optionContainer = document.createElement('div');
-    optionContainer.id = 'optionContainer';
-    optionContainer.className = 'flex flex-row items-center overflow-wrap';
-    // headerContainer.appendChild(optionContainer);
-    return optionContainer;
+    const optionScreen = document.createElement('div');
+    optionScreen.id = 'optionScreen';
+    return optionScreen
+}
+    
+function openModalPopupUI(upper, lower) {
+    const optionScreen = document.getElementById('optionScreen');
+    optionScreen.className = `fixed pin inset-0 z-40 overflow-auto bg-${mainColor}-${getHighClrVal()} bg-opacity-70 flex`;
+    optionScreen.id = 'optionScreen';
+    optionScreen.addEventListener('click',event => {
+        optionScreen.innerHTML = '';
+        optionScreen.classList = '';
+    });
+    const outerContainer = document.createElement('div');
+    outerContainer.id = 'outerOptionScreen';
+    outerContainer.className = "z-50 w-3/4 shadow-inner w-half md:relative align-top m-auto justify-end md:justify-center p-8 bg-white md:rounded md:shadow flex flex-col";
+    const innerUpper = document.createElement('div');
+    innerUpper.id = 'innerUpper';
+    innerUpper.className = `p-2 h-20 flex flex-row w-full bg-${accentColor}-${getHighClrVal()} rounded-t-md items-center overflow-wrap`
+    innerUpper.appendChild(upper);
+    const innerLower = document.createElement('div');
+    innerLower.id = 'innerLower';
+    innerLower.className = `flex flex-row w-full bg-${mainColor}-${getMidClrVal()} rounded-b-md items-center overflow-wrap`
+    innerLower.appendChild(lower);
+    outerContainer.appendChild(innerUpper);
+    outerContainer.appendChild(innerLower);
+    optionScreen.appendChild(outerContainer);
 }
 
 function optionBtnAction() {
-    //TOGGLES OPTIONS
-    const optionContainer = document.getElementById('optionContainer');
-    if (optionContainer.innerHTML.length>0) {
-        optionContainer.innerHTML = '';
-    } else {
-        openOptionDrawer();
-    };
-    return '';
+    const options = populateUpperOptions();
+    const colorBtns = pickColorUI('mainColor');
+    openModalPopupUI(options,colorBtns);
 }
 
-function openOptionDrawer() {
-    const optionContainer = document.getElementById('optionContainer');
-    const pickMainClrBtn = toolBtnGen(id='pickMainClrBtn',color='main',width='w-1/5',label='Main Color', callback=pickMainClrAction);
-    const pickAccentClrBtn = toolBtnGen(id='pickAccentClrBtn',color='accent',width='w-1/5',label='Accent Color', callback=pickAccentClrAction);
-    optionContainer.appendChild(pickMainClrBtn);
-    optionContainer.appendChild(pickAccentClrBtn);
+function populateUpperOptions() {
+    const upperContainer = document.createElement('innerOptionScreen');
+    upperContainer.id = upperContainer;
+    upperContainer.className = `flex flex-row w-full bg-${accentColor}-${getHighClrVal()} items-center overflow-wrap`;
+    const pickMainClrBtn = toolBtnGen(id='pickMainClrBtn',color='main',width='w-1/5',label='Main Color', callback=mainClrOptionAction);
+    const pickAccentClrBtn = toolBtnGen(id='pickAccentClrBtn',color='accent',width='w-1/5',label='Accent Color', callback=accentClrOptionAction);
+    upperContainer.appendChild(pickMainClrBtn);
+    upperContainer.appendChild(pickAccentClrBtn);
+    return upperContainer
 }
 
-function pickAccentClrAction() {
+function populateLowerOptions(element) {
+    const lowerContainer = document.getElementById('innerLower');
+    
+}
+
+function accentClrOptionAction() {
     console.log('pick accent color btn');
     return '';
 }
 
-function pickMainClrAction() {
+function mainClrOptionAction() {
     console.log('pick main color btn');
     return '';
 }
@@ -365,21 +392,40 @@ function closeToolDrawerUI() {
     toolContainer.innerHTML = '';
 }
 
-function pickColorUI() {
+function pickColorUI(colorOption) {
     const pickColor = document.createElement('div');
     pickColor.id = 'pickClrContainer';
-    pickColor.className = 'flex flex-row items-center overflow-wrap w-11/12'
+    pickColor.className = 'flex flex-row items-center overflow-wrap'
     color_choices.forEach(color => {
-        pickColor.appendChild(colorBtn(color));
+        const colorBtn = colorChoiceUI(color.toLowerCase(),colorOption);
+        pickColor.appendChild(colorBtn);
     });
     return pickColor;
 }
 
-function colorChoiceUI(color, callback) {
+function colorChoiceUI(color, colorOption) {
     const colorBtn = document.createElement('button');
-    colorBtn.className = `rounded-full bg-${color}-500`;
+    colorBtn.className = `rounded-full p-2 m-4 w-12 h-12 bg-${color}-500`;
     colorBtn.id = `colorBtn-${color}`;
-    colorBtn.addEventListener('click', callback);
+    colorBtn.addEventListener('click', e => {
+        switch (colorOption) {
+            case 'accentColor':
+                accentColor = color;
+                saveValueToLocalStorage('accentColor',accentColor);
+                initializeApp();
+                break;
+            case 'mainColor':
+                mainColor = color;
+                saveValueToLocalStorage('mainColor',mainColor);
+                initializeApp();
+                break;
+            case 'warningColor':
+                warningColor = color;
+                saveValueToLocalStorage('warningColor',warningColor);
+                initializeApp();
+                break;
+        }
+    });
     return colorBtn;
 
 }
@@ -423,11 +469,9 @@ function toolBtnGen(id, color='main', width='w-1/5', label='', callback, height=
     switch (color) {
         case 'main':
             color_swtch = `bg-${mainColor}-${getMidClrVal()}`;
-            console.log(`${id}:${mainColor}`);
             break;
         case 'accent':
             color_swtch = `bg-${accentColor}-${getMidClrVal()}`;
-            console.log(`${id}:${accentColor}`);
             break;
         case 'warning':
             color_swtch = `bg-${warningColor}-${getMidClrVal()}`;
@@ -445,7 +489,7 @@ function toolBtnGen(id, color='main', width='w-1/5', label='', callback, height=
     div.className = `m-2 grid justify-items-center ${height} ${width} ${color_swtch} ${border} ${rounded}`;
     const button = document.createElement('button');
     button.id = id;
-    button.className = '"p-2 m-2 text-center';
+    button.className = 'text-center';
     button.textContent = label;
     button.addEventListener('click', function(event) {
         callback();
@@ -475,7 +519,7 @@ function csvControllerUI() {
 function currentFileContainerUI() {
     const currentFileContainer = document.createElement('div');
     currentFileContainer.id = 'currentFileContainer';
-    currentFileContainer.className = `"m-1 w-3/5 bg-${mainColor}-${getHighClrVal()} flex justify-between ${rounded}`;
+    currentFileContainer.className = `"m-1 w-3/5 bg-${mainColor}-${getLowClrVal()} flex justify-between ${rounded}`;
     const currentFileTextLeft = document.createElement('div');
     currentFileTextLeft.id = 'currentFileTextLeft';
     currentFileTextLeft.className = `justify-self-start p-2 m-2`;
