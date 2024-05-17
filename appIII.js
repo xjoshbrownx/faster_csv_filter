@@ -2,14 +2,6 @@
 const csvData = [];
 const filteredRowList = [];
 const excludedWords = new Set();
-let mainColor = 'slate';
-let accentColor = 'amber';
-let warningColor = 'red';
-let rounded = 'rounded-md';
-let border = 'border border-gray-500';
-let overflow = 'overflow-x-scroll';
-let brightness = 400;
-let contrast = 200;
 let toolDrawer = 0;
 const settings = {
     themeSettings : {
@@ -23,14 +15,14 @@ const settings = {
         midClrVal : 500,
         highClrVal : 700,
         color_choices : ['zinc','yellow','violet','teal','stone','slate','sky','rose','red','purple','pink','prange','neutral','lime','indigo','green','gray','fuchsia','emerald','cyan','blue','amber'],
-        rounded : 'md', 
-        cellOverflow : 'x-scroll',
+        rounded : 'md',
+        border : 'border border-gray-500',
         precision : 2,
     },
-
     colors : {
         textColorLight : 'text-amber-200',
         textColorDark : 'text-amber-800',
+        mainColorLower : `bg-slate-50`,
         mainColorLow : `bg-slate-200`,
         mainColorMid : `bg-slate-500`,
         mainColorHigh : `bg-slate-700`,
@@ -41,19 +33,19 @@ const settings = {
         warningColorMid : `bg-red-500`,
         warningColorHigh : `bg-red-700`,
     },
-
     getColors : {
-        textColorLight : function(){return `text-${this.themesettings.accentColor}-200`},
-        textColorDark : function(){return `text-${this.themesettings.accentColor}-800`},
-        mainColorLow : function(){return `bg-${this.parent.themesettings.mainColor}-${this.themesettings.lowClrVal}`},
-        mainColorMid : function(){return `bg-${this.parent.themesettings.mainColor}-${this.themesettings.midClrVal}`},
-        mainColorHigh : function(){return `bg-${this.parent.themesettings.mainColor}-${this.themesettings.highClrVal}`},
-        accentColorLow : function(){return `bg-${this.themesettings.accentColor}-${this.themesettings.lowClrVal}`},
-        accentColorMid : function(){return `bg-${this.themesettings.accentColor}-${this.themesettings.midClrVal}`},
-        accentColorHigh : function(){return `bg-${this.themesettings.accentColor}-${this.themesettings.highClrVal}`},
-        warningColorLow : function(){return `bg-${this.themesettings.warningColor}-${this.themesettings.lowClrVal}`},
-        warningColorMid : function(){return `bg-${this.themesettings.warningColor}-${this.themesettings.midClrVal}`},
-        warningColorHigh : function(){return `bg-${this.themesettings.warningColor}-${this.themesettings.highClrVal}`},
+        textColorLight : function(){return `text-${settings.themeSettings.accentColor}-200`},
+        textColorDark : function(){return `text-${settings.themeSettings.accentColor}-800`},
+        mainColorLower : function(){return `bg-${settings.themeSettings.mainColor}-50`},
+        mainColorLow : function(){return `bg-${settings.themeSettings.mainColor}-${settings.themeSettings.lowClrVal}`},
+        mainColorMid : function(){return `bg-${settings.themeSettings.mainColor}-${settings.themeSettings.midClrVal}`},
+        mainColorHigh : function(){return `bg-${settings.themeSettings.mainColor}-${settings.themeSettings.highClrVal}`},
+        accentColorLow : function(){return `bg-${settings.themeSettings.accentColor}-${settings.themeSettings.lowClrVal}`},
+        accentColorMid : function(){return `bg-${settings.themeSettings.accentColor}-${settings.themeSettings.midClrVal}`},
+        accentColorHigh : function(){return `bg-${settings.themeSettings.accentColor}-${settings.themeSettings.highClrVal}`},
+        warningColorLow : function(){return `bg-${settings.themeSettings.warningColor}-${settings.themeSettings.lowClrVal}`},
+        warningColorMid : function(){return `bg-${settings.themeSettings.warningColor}-${settings.themeSettings.midClrVal}`},
+        warningColorHigh : function(){return `bg-${settings.themeSettings.warningColor}-${settings.themeSettings.highClrVal}`},
     },
 
     setBrightness : function(brightness) {
@@ -69,29 +61,28 @@ const settings = {
     setTextColor : function(textColor) {
         this.themeSettings.textColor = textColor;
         this.storeSettings();
-        const oldClrs = [this.colors.textColorDark,this.colors.textColorLight];
-        oldClrs.forEach(clr => this.refreshNodes(clr));
+        const oldClrs = ['textColorDark','textColorLight'];
+        oldClrs.forEach(clr => this.refreshClrClsUI(clr));
         // this.refreshTextClrs();
     },
     setMainColor : function(mainColor) {
         this.themeSettings.mainColor = mainColor;
         this.storeSettings();
-        
-        const oldClrs = [this.colors.mainColorHigh,this.colors.mainColorMid,this.colors.mainColorLow];
-        this.refreshMainClrs();
-        oldClrs.forEach(clr => this.refreshNodes(clr));
+        const oldClrs = ['mainColorHigh','mainColorMid','mainColorLow','mainColorLower'];
+        // oldClrs.forEach(clr => this.refreshMainClrs(clr));
+        oldClrs.forEach(clr => this.refreshClrClsUI(clr));
     },
     setAccentColor : function(accentColor) {
         this.themeSettings.accentColor = accentColor;
         this.storeSettings();
-        const oldClrs = [this.colors.accentColorHigh,this.colors.accentColorMid,this.colors.accentColorLow];
-        oldClrs.forEach(clr => this.refreshNodes(clr));
+        const oldClrs = ['accentColorHigh','accentColorMid','accentColorLow'];
+        oldClrs.forEach(clr => this.refreshClrClsUI(clr));
         // this.refreshAccentClrs();
     },
     setWarningColor : function(warningColor) {
         this.themeSettings.warningColor = warningColor;
         this.storeSettings();
-        const oldClrs = [this.colors.warningColorHigh,this.colors.warningColorMid,this.colors.warningColorLow]
+        const oldClrs = ['warningColorHigh','warningColorMid','warningColorLow']
         oldClrs.forEach(clr => this.refreshNodes(clr));
         // this.refreshWarningClrs();
     },
@@ -99,8 +90,9 @@ const settings = {
         localStorage.setItem('settings',JSON.stringify(this.themeSettings));
     },
     loadSettings : function() {
-        storedSettings = localStorage.getItem('setttings');
-        this.themeSettings = Object.keys(storeSettings).length ? JSON : [];
+        storedSettings = localStorage.getItem('settings');
+
+        this.themeSettings = Boolean(storedSettings) ? JSON.parse(storedSettings) : settings.themeSettings;
     },
     refreshValues : function() {
         midMap = {1:300,2:400,3:500,4:600,5:700}; 
@@ -112,9 +104,10 @@ const settings = {
     refreshTextClrs: function() {
         this.colors.textColorDark = `bg-${this.themeSettings.textColor}-800`;
         this.colors.textColorLight = `bg-${this.themeSettings.textColor}-200`;
-        // return [this.colors.textColorDark,this.colors.textColorLight];
     },
     refreshMainClrs : function() {
+
+        this.colors.mainColorLower = `bg-${this.themeSettings.mainColor}-50`;
         this.colors.mainColorLow = `bg-${this.themeSettings.mainColor}-${this.themeSettings.lowClrVal}`;
         this.colors.mainColorMid = `bg-${this.themeSettings.mainColor}-${this.themeSettings.midClrVal}`;
         this.colors.mainColorHigh = `bg-${this.themeSettings.mainColor}-${this.themeSettings.highClrVal}`;
@@ -134,15 +127,19 @@ const settings = {
         this.refreshAccentClrs();
         this.refreshWarningClrs();
     },
-    refreshNodes : function(classvalue) {
-        console.log(classvalue);
-        const nodes = document.querySelectorAll(`.${classvalue}`)
+    refreshClrClsUI : function(objProp) {
+        oldClr = this.colors[objProp];
+        newClr = settings.getColors[objProp]();
+        const nodes = document.querySelectorAll(`.${oldClr}`)
         nodes.forEach(node => {
-            clrInd = Array.from(node.classlist).indexOf(classvalue);
-            node.classlist[clrInd] = this.getColors[classvalue]();
+            node.classList.remove(oldClr);
+            node.classList.add(newClr);
         });
-        // this.colors[classvalue] = this.getColors[classvalue]()
+        this.refreshClrCls(objProp);
     },
+    refreshClrCls: function(objProp) {
+        settings.colors[objProp] = settings.getColors[objProp]()
+    }
 }
 
 // ADD INDEX FUNCTIONALITY
@@ -151,7 +148,7 @@ const settings = {
 function initializeApp() {
     // Initalize app
     document.addEventListener('DOMContentLoaded', () => {
-        loadInterfaceOptionsFromLocalStorage();
+        settings.loadSettings();
         fileManagementUI();
         loadCSVData().forEach(row => csvData.push(row));
         // const filteredData = [...csvData];
@@ -290,36 +287,6 @@ function loadToolDrawerSetting() {
     toolDrawer = tempTool ? tempTool : toolDrawer;
 }
 
-function loadInterfaceOptionsFromLocalStorage() {
-    tempMainColor = localStorage.getItem('mainColor');
-    mainColor = tempMainColor ? tempMainColor : mainColor;  
-    tempAccentColor = localStorage.getItem('accentColor');
-    accentColor = tempAccentColor ? tempAccentColor : accentColor;
-    tempWarningColor = localStorage.getItem('warningColor');
-    warningColor = tempWarningColor ? tempWarningColor : warningColor;
-    tempRounded = localStorage.getItem('rounded');
-    rounded = tempRounded ? tempRounded : rounded;
-    tempBorder = localStorage.getItem('border');
-    border = tempBorder ? tempBorder : border;
-    tempOverflow = localStorage.getItem('overflow');
-    overflow = tempOverflow ? tempOverflow : overflow;
-    tempBrightness = localStorage.getItem('brightness');
-    brightness = tempBrightness ? tempBrightness : brightness;
-    tempContrast = localStorage.getItem('tempContrast');
-    contrast = tempContrast ? tempContrast : contrast;
-}
-
-function saveInterfaceOptionsToLocalStorage() {
-    localStorage.setItem('mainColor',mainColor);
-    localStorage.setItem('accentColor',accentColor);
-    localStorage.setItem('warningColor',warningColor);
-    localStorage.setItem('rounded',rounded);
-    localStorage.setItem('border',border);
-    localStorage.setItem('overflow',overflow);
-    localStorage.setItem('brightness',brightness);
-    localStorage.setItem('tempContrast',contrast);
-}
-
 // if csv exists load CSV data from localStorage 
 // else returns empty array
 function loadDataFromLocalStorage(key) {
@@ -403,7 +370,7 @@ function moduleInstance(id, classNameText) {
     const headerContainer = document.getElementById('headerContainer');
     const moduleOuter = document.createElement('div');
     moduleOuter.id = id;
-    className = classNameText ? classNameText : `p-4 m-4 w-11/12 flex justify-between flex-row ${border} ${rounded}`;
+    className = classNameText ? classNameText : `p-4 m-4 w-11/12 flex justify-between flex-row ${settings.themeSettings.border} rounded-${settings.themeSettings.rounded}`;
     moduleOuter.className = className;
     headerContainer.appendChild(moduleOuter);
     return moduleOuter;
@@ -413,7 +380,7 @@ function moduleInstance(id, classNameText) {
 function headerContainerUI() {
     const headerContainer = document.createElement('div');
     headerContainer.id = 'headerContainer';
-    headerContainer.className = `bg-${mainColor}-${getHighClrVal()} p-4 m-4 w-11/12 ${rounded}`;
+    headerContainer.className = `${settings.colors.mainColorHigh} p-4 m-4 w-11/12 rounded-${settings.themeSettings.rounded}`;
     const controllerContainer = document.createElement('div');
     controllerContainer.id = "controllerContainer";
     controllerContainer.className = "flex flex-row items-center"; 
@@ -449,7 +416,7 @@ function createModalPopupUI() {
     
 function openModalPopupUI(upper, lower) {
     const optionScreen = document.getElementById('optionScreen');
-    optionScreen.className = `fixed pin inset-0 z-40 overflow-auto bg-${mainColor}-${getHighClrVal()} bg-opacity-70 flex`;
+    optionScreen.className = `fixed pin inset-0 z-40 overflow-auto ${settings.colors.mainColorHigh} bg-opacity-70 flex`;
     optionScreen.id = 'optionScreen';
     optionScreen.addEventListener('click',event => {
         optionScreen.innerHTML = '';
@@ -460,11 +427,11 @@ function openModalPopupUI(upper, lower) {
     outerContainer.className = "z-50 w-3/4 shadow-inner w-half md:relative align-top m-auto justify-end md:justify-center p-8 bg-white md:rounded md:shadow flex flex-col";
     const innerUpper = document.createElement('div');
     innerUpper.id = 'innerUpper';
-    innerUpper.className = `p-2 h-20 flex flex-row w-full bg-${accentColor}-${getHighClrVal()} rounded-t-md items-center overflow-wrap`
+    innerUpper.className = `p-2 h-20 flex flex-row w-full ${settings.colors.accentColorHigh} rounded-t-md items-center overflow-wrap`
     innerUpper.appendChild(upper);
     const innerLower = document.createElement('div');
     innerLower.id = 'innerLower';
-    innerLower.className = `flex flex-row w-full bg-${mainColor}-${getMidClrVal()} rounded-b-md items-center overflow-wrap`
+    innerLower.className = `flex flex-row w-full ${settings.colors.mainColorMid} rounded-b-md items-center overflow-wrap`
     innerLower.appendChild(lower);
     outerContainer.appendChild(innerUpper);
     outerContainer.appendChild(innerLower);
@@ -480,7 +447,7 @@ function optionBtnAction() {
 function populateUpperOptions() {
     const upperContainer = document.createElement('innerOptionScreen');
     upperContainer.id = upperContainer;
-    upperContainer.className = `flex flex-row w-full bg-${accentColor}-${getHighClrVal()} items-center overflow-wrap`;
+    upperContainer.className = `flex flex-row w-full ${settings.colors.accentColorHigh} items-center overflow-wrap`;
     const pickMainClrBtn = toolBtnGen(id='pickMainClrBtn',color='main',width='w-1/5',label='Main Color', callback=mainClrOptionAction);
     const pickAccentClrBtn = toolBtnGen(id='pickAccentClrBtn',color='accent',width='w-1/5',label='Accent Color', callback=accentClrOptionAction);
     upperContainer.appendChild(pickMainClrBtn);
@@ -528,7 +495,7 @@ function pickColorUI(colorOption) {
     const pickColor = document.createElement('div');
     pickColor.id = 'pickClrContainer';
     pickColor.className = 'flex flex-row items-center overflow-wrap'
-    color_choices.forEach(color => {
+    settings.color_choices.forEach(color => {
         const colorBtn = colorChoiceUI(color.toLowerCase(),colorOption);
         pickColor.appendChild(colorBtn);
     });
@@ -572,9 +539,9 @@ function addModuleBtnAction() {
 
 function refreshColors(newColor, newBrightness, newContrast) {
     
-    let oldLowClr = `bg-${mainColor}-${getLowClrVal()}`;
-    let oldMidClr = `bg-${mainColor}-${getMidClrVal()}`;
-    let oldHighClr = `bg-${mainColor}-${getHighClrVal()}`;
+    let oldLowClr = `${settings.colors.mainColorLow}`;
+    let oldMidClr = `${settings.colors.mainColorMid}`;
+    let oldHighClr = `${settings.colors.mainColorHigh}`;
     let newLowClr = `bg-${newColor}-${newBrightness-newContrast}`;
     let newMidClr = `bg-${newColor}-${newBrightness}`;
     let newHighClr = `bg-${newColor}-${newBrightness+newContrast}`;
@@ -600,25 +567,25 @@ function refreshColors(newColor, newBrightness, newContrast) {
 function toolBtnGen(id, color='main', width='w-1/5', label='', callback, height='h-14') {
     switch (color) {
         case 'main':
-            color_swtch = `bg-${mainColor}-${getMidClrVal()}`;
+            color_swtch = `${settings.colors.mainColorMid}`;
             break;
         case 'accent':
-            color_swtch = `bg-${accentColor}-${getMidClrVal()}`;
+            color_swtch = `${settings.colors.accentColorMid}`;
             break;
         case 'warning':
-            color_swtch = `bg-${warningColor}-${getMidClrVal()}`;
+            color_swtch = `${settings.colors.warningColorMid}`;
             break;
         case 'clear':
             color_swtch = `bg-inherit`;
             break;
         default:
-            color_swtch = `bg-${mainColor}-${getMidClrVal()}`;
+            color_swtch = `${settings.colors.mainColorMid}`;
             break;
     }
 
     const div = document.createElement('div');;
     div.id = `${id}-div`
-    div.className = `m-2 grid justify-items-center ${height} ${width} ${color_swtch} ${border} ${rounded}`;
+    div.className = `m-2 grid justify-items-center ${height} ${width} ${color_swtch} ${settings.themeSettings.border} rounded-${settings.themeSettings.rounded}`;
     const button = document.createElement('button');
     button.id = id;
     button.className = 'text-center';
@@ -633,7 +600,7 @@ function toolBtnGen(id, color='main', width='w-1/5', label='', callback, height=
 function csvControllerUI() {
     const csvController = document.createElement('div');
     csvController.id = 'csvController';
-    csvController.className = `m-1 w-2/5 ${rounded}`;
+    csvController.className = `m-1 w-2/5 rounded-${settings.themeSettings.rounded}`;
     const csvFileInput = document.createElement('input');
     csvFileInput.id = 'csvFileInput';
     csvFileInput.type = 'file';
@@ -651,7 +618,7 @@ function csvControllerUI() {
 function currentFileContainerUI() {
     const currentFileContainer = document.createElement('div');
     currentFileContainer.id = 'currentFileContainer';
-    currentFileContainer.className = `"m-1 w-3/5 bg-${mainColor}-${getLowClrVal()} flex justify-between ${rounded}`;
+    currentFileContainer.className = `"m-1 w-3/5 ${settings.colors.mainColorLow} flex justify-between rounded-${settings.themeSettings.rounded}`;
     const currentFileTextLeft = document.createElement('div');
     currentFileTextLeft.id = 'currentFileTextLeft';
     currentFileTextLeft.className = `justify-self-start p-2 m-2`;
@@ -681,13 +648,13 @@ function currentFileContainerUI() {
 function excludeModuleUI() {
     const excludeModule = document.createElement('div');
     excludeModule.id = 'excludemodule';
-    excludeModule.className = `p-4 m-4 w-11/12 flex justify-between flex-row ${border} ${rounded}`;
+    excludeModule.className = `p-4 m-4 w-11/12 flex justify-between flex-row ${settings.themeSettings.border} rounded-${settings.themeSettings.rounded}`;
     const excludedWordsList = document.createElement('div');
     excludedWordsList.id = 'excludedWordsList';
     excludedWordsList.className = 'w-4/5 flex py-2 flex-wrap';
     const excludedControls = document.createElement('div');
     excludedControls.id = 'excludedControls';
-    excludedControls.className = `w/1/5 flex flex-col py-2 items-center ${border} ${rounded}`;
+    excludedControls.className = `w/1/5 flex flex-col py-2 items-center ${settings.themeSettings.border} rounded-${settings.themeSettings.rounded}`;
     excludeModule.appendChild(excludedWordsList);
     excludeModule.appendChild(excludedControls);
     return excludeModule;
@@ -696,7 +663,7 @@ function excludeModuleUI() {
 function csvTableContainerUI() {
     const csvTableContainer = document.createElement('div');
     csvTableContainer.id = 'csvTableContainer';
-    csvTableContainer.className = `p-4 m-4 w-11/12 ${overflow} ${rounded}`;
+    csvTableContainer.className = `p-4 m-4 w-11/12 overflow-x-scroll rounded-${settings.themeSettings.rounded}`;
     return csvTableContainer;
 }
 
@@ -758,12 +725,13 @@ function renderTable(tableData, page) {
 }
 
 function renderRow(row, rowIndex, header=false) {
-    rowColor = rowIndex % 2 ? `bg-${mainColor}-${getLowClrVal()-100}` : `bg-${mainColor}-${getLowClrVal()}`;
+    rowColor = rowIndex % 2 ? `${settings.colors.mainColorLower}` : `${settings.colors.mainColorLow}`;
     dtl_el = header ? 'th' : 'td' //detail element is table header or table detail
     const tr = document.createElement('tr');
+    tr.className = `${rowColor}`
     row.forEach((cell, colIndex) => {
         const td = document.createElement(dtl_el);
-        td.className = `text-left px-4 py-2 ${rowColor}`;
+        td.className = `text-left px-4 py-2`;
         // runs cell prep on cell if not header else runs header prep 
         const words = header ? headerPrep(cell) : cellPrep(cell, colIndex);
         // const words = cell;
@@ -818,7 +786,7 @@ function cellPrep(cell, colIndex, trunc=2) {
             wordSpan.style.cursor = 'pointer'; // Set cursor to pointer for clickable effect
             wordSpan.addEventListener('mouseover', () => {
                 // wordSpan.style.backgroundColor = '#ed8936'; // Highlight on hover
-                wordSpan.className = `p-2 border bg-${mainColor}-${getMidClrVal()} ${rounded}` //OPTIONS
+                wordSpan.className = `p-2 border ${settings.colors.mainColorMid} rounded-${settings.themeSettings.rounded}` //OPTIONS
             });
             wordSpan.addEventListener('mouseout', () => {
                 // wordSpan.style.backgroundColor = ''; // Remove highlight on mouseout
@@ -872,7 +840,7 @@ function updateExcludedWordsList() {
     const excludedControls = document.getElementById('excludedControls');
     excludedWordsList.innerHTML = '';
     excludedControls.innerHTML = '';
-    // const excludedWordsText = sidebarBtnGen('h3','Excluded Words:', `bg-${mainColor}-${getMidClrVal()}`);
+    // const excludedWordsText = sidebarBtnGen('h3','Excluded Words:', `${settings.colors.mainColorMid}`);
     const excludedWordsText = toolBtnGen('excludedWordsText','main','w-1/5','Excluded Words');
     excludedWordsList.appendChild(excludedWordsText);
     excludedWords.forEach(item => {
@@ -884,8 +852,8 @@ function updateExcludedWordsList() {
         excludedWordsList.appendChild(wordElement);
     });
     if (excludedWords.size) {
-        exportExclude = sidebarBtnGen('div','Export List',`bg-${mainColor}-${getMidClrVal()}`,'','click',exportExcludeWords);
-        clearExclude = sidebarBtnGen('div','Clear List',`bg-${warningColor}-500`,'','click',clearExcludeWords);
+        exportExclude = sidebarBtnGen('div','Export List',`${settings.colors.mainColorMid}`,'','click',exportExcludeWords);
+        clearExclude = sidebarBtnGen('div','Clear List',settings.colors.warningColorMid,'','click',clearExcludeWords);
         excludedControls.appendChild(exportExclude);
         excludedControls.appendChild(clearExclude);
     } else {
@@ -894,7 +862,7 @@ function updateExcludedWordsList() {
             importExclude.type = 'file';
             importExclude.accept=".csv";
             importExclude.textContent = 'Import Excluded Words List';
-            importExclude.className = `p-2 m-2 ${rounded}`;
+            importExclude.className = `p-2 m-2 rounded-${settings.themeSettings.rounded}`;
             importExclude.addEventListener('change', function(event) {
                 const file = event.target.files[0];
                 importExcludeWords(file);
@@ -965,7 +933,7 @@ function wordElementLogic(item) {
 function sidebarBtnGen(type, text, color='bg-amber-500', className='', event='', func='') {
     const wordButton = document.createElement(type);
     wordButton.textContent = text; 
-    wordButton.className = className ? className : `px-3 py-2 my-2 mx-4 items-center ${color} ${rounded}`;
+    wordButton.className = className ? className : `px-3 py-2 my-2 mx-4 items-center ${color} rounded-${settings.themeSettings.rounded}`;
     if (event) {
         wordButton.addEventListener(event, func);
     }
@@ -980,7 +948,7 @@ initializeApp()
 
 // function colorChange(color) {
 //     headerContainer = getElementById("headerContainer");
-//     headerContainer.className = `bg-${color}-200 p-4 m-4 w-11/12 ${rounded}`;
+//     headerContainer.className = `bg-${color}-200 p-4 m-4 w-11/12 rounded-${settings.themeSettings.rounded}`;
 //     currentFileContainer = getElementById("currentFileContainer");
-//     currentFileContainer.className = `bg-${color}-600 m-1 w-3/5 flex justify-between ${rounded}`
+//     currentFileContainer.className = `bg-${color}-600 m-1 w-3/5 flex justify-between rounded-${settings.themeSettings.rounded}`
 // }
