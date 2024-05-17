@@ -195,6 +195,7 @@ function populateActiveFileElement(filteredRowLength) {
 function loadCSV(file) {
     clearData();
     filename = file.name;
+    toolDrawer = 0;
     saveDataToLocalStorage('filename',filename);
     const reader = new FileReader();
     reader.onload = function(event) {
@@ -282,10 +283,11 @@ function exportCSV(filename, tableData) {
 
 // LOCAL STORAGE FUNCTIONS
 
-function loadToolDrawerSetting() {
-    tempTool = localStorage.getItem('toolDrawer');
-    toolDrawer = tempTool ? tempTool : toolDrawer;
-}
+// KILL MAYBE
+// function loadToolDrawerSetting() {
+//     tempTool = localStorage.getItem('toolDrawer');
+//     toolDrawer = tempTool ? tempTool : toolDrawer;
+// }
 
 // if csv exists load CSV data from localStorage 
 // else returns empty array
@@ -439,6 +441,7 @@ function openModalPopupUI(upper, lower) {
 }
 
 function optionBtnAction() {
+    console.log('optionBTNPUSHED')
     const options = populateUpperOptions();
     const colorBtns = pickColorUI('mainColor');
     openModalPopupUI(options,colorBtns);
@@ -494,11 +497,13 @@ function closeToolDrawerUI() {
 function pickColorUI(colorOption) {
     const pickColor = document.createElement('div');
     pickColor.id = 'pickClrContainer';
-    pickColor.className = 'flex flex-row items-center overflow-wrap'
-    settings.color_choices.forEach(color => {
+    pickColor.className = 'flex flex-row items-center flex-wrap'
+    settings.themeSettings.color_choices.forEach(color => {
+        // console.log(color);
         const colorBtn = colorChoiceUI(color.toLowerCase(),colorOption);
         pickColor.appendChild(colorBtn);
     });
+    
     return pickColor;
 }
 
@@ -506,7 +511,8 @@ function colorChoiceUI(color, colorOption) {
     const colorBtn = document.createElement('button');
     colorBtn.className = `rounded-full p-2 m-4 w-12 h-12 bg-${color}-500`;
     colorBtn.id = `colorBtn-${color}`;
-    colorBtn.addEventListener('click', e => {
+    colorBtn.textContent = color;
+   colorBtn.addEventListener('click', e => {
         switch (colorOption) {
             case 'accentColor':
                 accentColor = color;
