@@ -19,10 +19,10 @@ const settings = {
         precision : 2,
     },
     color_choices : ['zinc','yellow','violet','teal','stone','slate','sky','rose','red','purple','pink','orange','neutral','lime','indigo','green','gray','fuchsia','emerald','cyan','blue','amber'],
-    color_choices : ['zinc','yellow','violet','teal','stone','slate','sky','rose','red','purple','pink','orange','neutral','lime','indigo','green','gray','fuchsia','emerald','cyan','blue','amber','black'],
+    text_choices : ['zinc','yellow','violet','teal','stone','slate','sky','rose','red','purple','pink','orange','neutral','lime','indigo','green','gray','fuchsia','emerald','cyan','blue','amber','black'],
     colors : {
-        textColorLight : 'text-purple-200',
-        textColorDark : 'text-purple-900',
+        textColorLight : 'text-gray-200',
+        textColorDark : 'text-gray-900',
         mainColorLower : `bg-slate-50`,
         mainColorLow : `bg-slate-200`,
         mainColorMid : `bg-slate-500`,
@@ -562,7 +562,6 @@ function openToolDrawerUI() {
     toolContainer.appendChild(optionsBtn);
     toolContainer.appendChild(addModuleBtn);
 }
-
 
 function closeToolDrawerUI() {
     toolContainer = document.getElementById('toolContainer');
