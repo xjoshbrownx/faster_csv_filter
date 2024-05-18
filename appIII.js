@@ -8,7 +8,7 @@ const settings = {
         mainColor : 'slate',
         accentColor : 'amber',
         warningColor : 'red',
-        textColor: 'amber',
+        textColor: 'purple',
         brightness : 3, //1-5 
         contrast : 2, //1-3
         lowClrVal : 200,
@@ -20,8 +20,8 @@ const settings = {
     },
     color_choices : ['zinc','yellow','violet','teal','stone','slate','sky','rose','red','purple','pink','orange','neutral','lime','indigo','green','gray','fuchsia','emerald','cyan','blue','amber'],
     colors : {
-        textColorLight : 'text-amber-200',
-        textColorDark : 'text-amber-800',
+        textColorLight : 'text-purple-200',
+        textColorDark : 'text-purple-900',
         mainColorLower : `bg-slate-50`,
         mainColorLow : `bg-slate-200`,
         mainColorMid : `bg-slate-500`,
@@ -34,8 +34,8 @@ const settings = {
         warningColorHigh : `bg-red-700`,
     },
     getColors : {
-        textColorLight : function(){return `text-${settings.themeSettings.accentColor}-200`},
-        textColorDark : function(){return `text-${settings.themeSettings.accentColor}-800`},
+        textColorLight : function(){return `text-${settings.themeSettings.textColor}-200`},
+        textColorDark : function(){return `text-${settings.themeSettings.textColor}-900`},
         mainColorLower : function(){return `bg-${settings.themeSettings.mainColor}-50`},
         mainColorLow : function(){return `bg-${settings.themeSettings.mainColor}-${settings.themeSettings.lowClrVal}`},
         mainColorMid : function(){return `bg-${settings.themeSettings.mainColor}-${settings.themeSettings.midClrVal}`},
@@ -63,13 +63,11 @@ const settings = {
         this.storeSettings();
         const oldClrs = ['textColorDark','textColorLight'];
         oldClrs.forEach(clr => this.refreshClrClsUI(clr));
-        // this.refreshTextClrs();
     },
     setMainColor : function(mainColor) {
         this.themeSettings.mainColor = mainColor;
         this.storeSettings();
         const oldClrs = ['mainColorHigh','mainColorMid','mainColorLow','mainColorLower'];
-        // oldClrs.forEach(clr => this.refreshMainClrs(clr));
         oldClrs.forEach(clr => this.refreshClrClsUI(clr));
     },
     setAccentColor : function(accentColor) {
@@ -77,21 +75,18 @@ const settings = {
         this.storeSettings();
         const oldClrs = ['accentColorHigh','accentColorMid','accentColorLow'];
         oldClrs.forEach(clr => this.refreshClrClsUI(clr));
-        // this.refreshAccentClrs();
     },
     setWarningColor : function(warningColor) {
         this.themeSettings.warningColor = warningColor;
         this.storeSettings();
         const oldClrs = ['warningColorHigh','warningColorMid','warningColorLow']
         oldClrs.forEach(clr => this.refreshClrClsUI(clr));
-        // this.refreshWarningClrs();
     },
     storeSettings : function() {
         localStorage.setItem('settings',JSON.stringify(this.themeSettings));
     },
     loadSettings : function() {
         storedSettings = localStorage.getItem('settings');
-
         this.themeSettings = Boolean(storedSettings) ? JSON.parse(storedSettings) : settings.themeSettings;
     },
     refreshValues : function() {
@@ -99,31 +94,21 @@ const settings = {
         this.midClrVal = midMap[this.brightness];
         this.lowClrVal = Math.max(((3-this.contrast)*100),50);
         this.highClrVal = Math.min(((this.contrast)*100)+this.midClrVal,950);
-        // this.refreshAllClrs();
     },
     refreshTextClrs: function() {
         settings.refreshClrClsUI('textColorLight');
         settings.refreshClrClsUI('textColorDark');
-        // this.colors.textColorDark = `bg-${this.themeSettings.textColor}-800`;
-        // this.colors.textColorLight = `bg-${this.themeSettings.textColor}-200`;
     },
     refreshMainClrs : function() {
         settings.refreshClrClsUI('mainColorLower');
         settings.refreshClrClsUI('mainColorLow');
         settings.refreshClrClsUI('mainColorMid');
         settings.refreshClrClsUI('mainColorHigh');
-        // this.colors.mainColorLower = `bg-${this.themeSettings.mainColor}-50`;
-        // this.colors.mainColorLow = `bg-${this.themeSettings.mainColor}-${this.themeSettings.lowClrVal}`;
-        // this.colors.mainColorMid = `bg-${this.themeSettings.mainColor}-${this.themeSettings.midClrVal}`;
-        // this.colors.mainColorHigh = `bg-${this.themeSettings.mainColor}-${this.themeSettings.highClrVal}`;
     },
     refreshAccentClrs : function() {
         settings.refreshClrClsUI('accentColorLow');
         settings.refreshClrClsUI('accentColorMid');
         settings.refreshClrClsUI('accentColorHigh');
-        // this.colors.accentColorLow = `bg-${this.themeSettings.accentColor}-${this.themeSettings.lowClrVal}`;
-        // this.colors.accentColorMid = `bg-${this.themeSettings.accentColor}-${this.themeSettings.midClrVal}`;
-        // this.colors.accentColorHigh = `bg-${this.themeSettings.accentColor}-${this.themeSettings.highClrVal}`;
     },
     refreshWarningClrs : function() {
         settings.refreshClrClsUI('warningColorLow');
@@ -137,8 +122,11 @@ const settings = {
         this.refreshTextClrs();
     },
     refreshClrClsUI : function(objProp) {
+        // console.log(objProp);
         oldClr = this.colors[objProp];
+        console.log(oldClr);
         newClr = settings.getColors[objProp]();
+        console.log(newClr);
         const nodes = document.querySelectorAll(`.${oldClr}`)
         nodes.forEach(node => {
             node.classList.remove(oldClr);
@@ -146,6 +134,7 @@ const settings = {
         });
         this.refreshClrCls(objProp);
     },
+
     refreshClrCls: function(objProp) {
         settings.colors[objProp] = settings.getColors[objProp]()
     }
@@ -367,14 +356,18 @@ function storeExcludedWords() {
 
 function fileManagementUI() {
     const body = document.getElementsByTagName('body');
-    const screenContainer = document.createElement('div');
-    screenContainer.id = 'screenContainer';
+    // const screenContainer = document.createElement('div');
+    // screenContainer.id = 'screenContainer';
+    const screenContainer = document.getElementById('screenContainer');
+    screenContainer.classList.add(`${settings.colors.textColorDark}`);
+    const nameContainer = nameContainerUI();
     const headerContainer = headerContainerUI();
     const excludeModule = excludeModuleUI();
     const csvTableContainer = csvTableContainerUI();
     const optionScreen = createModalPopupUI();
 
-    // ASSEMBLE STRUCTURE    
+    // ASSEMBLE STRUCTURE
+    screenContainer.appendChild(nameContainer);
     screenContainer.appendChild(headerContainer);
     screenContainer.appendChild(excludeModule);
     screenContainer.appendChild(csvTableContainer);
@@ -382,7 +375,7 @@ function fileManagementUI() {
     // body[0].appendChild(headerContainer);
     // body[0].appendChild(excludeModule);
     // body[0].appendChild(csvTableContainer);
-    body[0].appendChild(screenContainer);
+    // body[0].appendChild(screenContainer);
     body[0].appendChild(optionScreen);
 }
 
@@ -394,13 +387,24 @@ function moduleInstance(id, classNameText) {
     moduleOuter.className = className;
     headerContainer.appendChild(moduleOuter);
     return moduleOuter;
-
 } 
+
+function nameContainerUI() {
+    const nameContainer = document.createElement('div'); 
+    nameContainer.id="nameContainer";
+    nameContainer.className = "w-full p-8 flex flex-row content-center justify-center";
+    const appName = document.createElement('p'); 
+    appName.id="appName"; 
+    appName.className=`text-center tracking-wide align-middle subpixel-antialiased ${settings.colors.textColorDark} font-extrabold text-3xl`;
+    appName.textContent='FASTER CSV FILTER';
+    nameContainer.appendChild(appName);
+    return nameContainer;
+}
 
 function headerContainerUI() {
     const headerContainer = document.createElement('div');
     headerContainer.id = 'headerContainer';
-    headerContainer.className = `${settings.colors.mainColorHigh} p-4 m-4 w-11/12 rounded-${settings.themeSettings.rounded}`;
+    headerContainer.className = `${settings.colors.mainColorHigh} p-4 mx-4 w-11/12 rounded-${settings.themeSettings.rounded}`;
     const controllerContainer = document.createElement('div');
     controllerContainer.id = "controllerContainer";
     controllerContainer.className = "flex flex-row items-center"; 
@@ -484,6 +488,7 @@ function populateUpperOptions(highlighted) {
     const pickMainClrBtn = toolBtnGen(id='pickMainClrBtn',color='main',width='w-1/5',label='Main Color', callback=mainClrOptionAction, height='h-14',event_='mouseover');
     const pickAccentClrBtn = toolBtnGen(id='pickAccentClrBtn',color='accent',width='w-1/5',label='Accent Color', callback=accentClrOptionAction, height='h-14',event_='mouseover');
     const pickWarningClrBtn = toolBtnGen(id='pickWarningClrBtn',color='warning',width='w-1/5',label='Warning Color', callback=warningClrOptionAction, height='h-14',event_='mouseover');
+    const pickTextClrBtn = toolBtnGen(id='pickTextClrBtn',color='text',width='w-1/5',label='Text Color', callback=textClrOptionAction, height='h-14',event_='mouseover');
     if (highlighted === 'main') {
         pickMainClrBtn.classList.add(`border-8`); 
         pickMainClrBtn.classList.add(`border-white`);
@@ -493,12 +498,15 @@ function populateUpperOptions(highlighted) {
     } else if (highlighted === 'warning') {
         pickWarningClrBtn.classList.add(`border-8`); 
         pickWarningClrBtn.classList.add(`border-white`);
+    } else if (highlighted === 'text') {
+        pickTextClrBtn.classList.add(`border-8`); 
+        pickTextClrBtn.classList.add(`border-white`);
     }
     upperContainer.appendChild(pickMainClrBtn);
     upperContainer.appendChild(pickAccentClrBtn);
     upperContainer.appendChild(pickWarningClrBtn);
-
-    return upperContainer
+    upperContainer.appendChild(pickTextClrBtn);
+    return upperContainer;
 }
 
 function populateLowerOptions(element) {
@@ -526,6 +534,14 @@ function mainClrOptionAction() {
 function warningClrOptionAction() {
     const options = populateUpperOptions('warning');
     const colorBtns = pickColorUI('warningColor');
+    closeModalPopupUI();
+    openModalPopupUI(options,colorBtns);
+    return '';
+}
+
+function textClrOptionAction() {
+    const options = populateUpperOptions('text');
+    const colorBtns = pickColorUI('textColor');
     closeModalPopupUI();
     openModalPopupUI(options,colorBtns);
     return '';
@@ -608,23 +624,29 @@ function colorChoiceUI(color, colorOption) {
    colorBtn.addEventListener('click', e => {
         switch (colorOption) {
             case 'accentColor':
-                accentColor = color;
+                // accentColor = color;
                 // saveValueToLocalStorage('accentColor',accentColor);
                 // initializeApp();
                 settings.setAccentColor(color);
                 closeModalPopupUI();
                 break;
             case 'mainColor':
-                mainColor = color;
+                // mainColor = color;
                 // saveValueToLocalStorage('mainColor',mainColor);
                 // initializeApp();
                 settings.setMainColor(color);
                 closeModalPopupUI();
                 break;
             case 'warningColor':
-                warningColor = color;
+                // warningColor = color;
                 // saveValueToLocalStorage('warningColor',warningColor);
                 settings.setWarningColor(color);
+                closeModalPopupUI();
+                break;
+            case 'textColor':
+                // textColor = color;
+                // saveValueToLocalStorage('warningColor',warningColor);
+                settings.setTextColor(color);
                 closeModalPopupUI();
                 break;
         }
