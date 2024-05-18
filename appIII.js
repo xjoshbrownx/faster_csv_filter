@@ -1011,7 +1011,6 @@ function importExcludeWords(file){
 
 
 }
-}
 
 function exportExcludeWords(){
     const csvPrep = [];
