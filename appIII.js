@@ -19,6 +19,7 @@ const settings = {
         precision : 2,
     },
     color_choices : ['zinc','yellow','violet','teal','stone','slate','sky','rose','red','purple','pink','orange','neutral','lime','indigo','green','gray','fuchsia','emerald','cyan','blue','amber'],
+    color_choices : ['zinc','yellow','violet','teal','stone','slate','sky','rose','red','purple','pink','orange','neutral','lime','indigo','green','gray','fuchsia','emerald','cyan','blue','amber','black'],
     colors : {
         textColorLight : 'text-purple-200',
         textColorDark : 'text-purple-900',
@@ -215,7 +216,7 @@ function swapFileOptions() {
     if (csvController.getElementsByTagName('input').length) {
         csvController.className = 'flex flex-row m-1 w-2/5'
         csvController.innerHTML = '';
-        const clearBtn = toolBtnGen(id='clearData',color='main',width='w-1/3',label='Clear Data',callback=clearData);
+        const clearBtn = toolBtnGen(id='clearData',color='warning',width='w-1/3',label='Clear Data',callback=clearData);
         const exportBtn = toolBtnGen(id='exportData',color='main',width='w-1/3',label='Export CSV',callback=exportFilteredCSV);
         const toolHideBtn = toolBtnGen(id='toolHideBtn',color='main',width='w-1/3',label='Show Tools',callback=toggleToolDrawerUI);
         csvController.appendChild(clearBtn);
@@ -947,7 +948,7 @@ function updateExcludedWordsList() {
         // const {word, colIndex} = item;
         let text = `${item.word} (${csvData[0][item.colIndex]})`;
         let eventFunc = wordElementLogic(item);
-        const wordElement = toolBtnGen(id=`word_el_${text}`,color='accent',width='w-1/5', label=text,callback=eventFunc);
+        const wordElement = toolBtnGen(id=`word_el_${text}`,color='accent',width='px-2', label=text,callback=eventFunc);
         // const wordElement = sidebarBtnGen('div',text, `bg-${accentColor}-${getMidClrVal()}`, '', 'click', eventFunc);
         excludedWordsList.appendChild(wordElement);
     });
