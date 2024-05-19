@@ -1,8 +1,118 @@
 // Declare variables
-const csvData = [];
-const filteredRowList = [];
-const excludedWords = new Set();
-let toolDrawer = 0;
+const sheet = {
+    settings = {
+        toolDrawer : 0,
+        modules : [],
+        hasHeaders : true,        
+    },
+
+    data = {
+        fileName : 'No Active File',
+        csvData : [],
+        headerIndName : {},
+        filteredRowList : [],
+        filteredData : [],
+    },
+
+    // Process Data
+    addWordFilterModule : function() {
+        obj = {
+            type : 'wordFilter',
+            wordlist : new Set(),
+            exclude : true,
+        };
+        this.settings.modules.push(obj);
+    },
+
+    addWordLabelModule : function() {
+        obj = {
+            type : 'wordLabel',
+            wordlist : new Set(),
+            exclude : true,
+            label : '',
+            labelColumn : 0,
+        };
+        this.settings.modules.push(obj);
+    },
+
+    addNumberFilterModule : function() {
+        obj = {
+            type : 'numberFilter',
+            value : 0,
+            operator : '',
+            filterColumn : 0,
+        };
+        this.settings.modules.push(obj);
+    },
+
+    addNumberLabelModule : function() {
+        obj = {
+            type : 'numberLabel',
+            value : 0,
+            operator : '',
+            filterColumn : 0,
+            labelColumn : -1,
+        };
+        this.settings.modules.push(obj);
+    },
+
+    filterData : function(module) {
+        this.data.filteredData = this.data.csvData.filter((row) => module)
+    },
+
+    // Data Management
+    loadData : function() {
+        const temp = localStorage.getItem('sheetData');
+        this.data = Boolean(temp) ? JSON.parse(storedData) : sheet.data;
+    },
+    storeData : function() {
+        localStorage.setItem('sheetData', JSON.stringify(this.data));        
+    },
+    
+    // Settings Management
+    loadSettings : function() {
+        this.toolDrawer
+    },
+    storeSettings : function() {
+        const temp = {...this.settings}
+        temp.excludedWords = Array.from(temp.excludedWords)
+        localStorage.setItem('sheetSettings', JSON.stringify(temp));
+    },
+    toggleToolDrawer : function() {this.settings.toolDrawer = this.settings.toolDrawer ? 0 : 1},
+
+
+    loadCSVData: function() {
+        const storedData = localStorage.getItem('csvData');
+        this.csvData = storedData ? JSON.parse(storedData) : []
+    },
+    // storeCSVData : function() {
+        // Function to save CSV data to localStorage 
+        // localStorage.setItem('csvData', JSON.stringify(this.csvData));
+    // },
+    storeFilename : function() {
+        
+    },
+    storeExcludedWords : function() {
+        saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
+    },
+    clear : function() {
+        this.clearData();
+        this.clearExcludeWords();
+    },
+    clearData : function() {
+        this.fileName = 'No Active File',
+        this.csvData = [],
+        this.headerIndName = {},
+        this.filteredRowList = [],
+        this.filteredData = [],
+        this.localStorage.removeItem('sheetData');
+    },
+    clearExcludeWords : function() {
+        this.excludedWords.clear();
+        
+    },
+}
+
 const settings = {
     themeSettings : {
         mainColor : 'slate',
@@ -48,7 +158,26 @@ const settings = {
         warningColorMid : function(){return `bg-${settings.themeSettings.warningColor}-${settings.themeSettings.midClrVal}`},
         warningColorHigh : function(){return `bg-${settings.themeSettings.warningColor}-${settings.themeSettings.highClrVal}`},
     },
-
+    getColorMid : function(color){
+        switch (color) {
+            case 'main':
+                color_swtch = `${settings.colors.mainColorMid}`;
+                break;
+            case 'accent':
+                color_swtch = `${settings.colors.accentColorMid}`;
+                break;
+            case 'warning':
+                color_swtch = `${settings.colors.warningColorMid}`;
+                break;
+            case 'clear':
+                color_swtch = `bg-inherit`;
+                break;
+            default:
+                color_swtch = `${settings.colors.mainColorMid}`;
+                break;
+        }
+        return color_swtch;
+    },
     setBrightness : function(brightness) {
         this.themeSettings.brightness = brightness;
         this.storeSettings();
@@ -86,7 +215,7 @@ const settings = {
     storeSettings : function() {
         localStorage.setItem('settings',JSON.stringify(this.themeSettings));
     },
-    loadSettings : function() {
+    load : function() {
         storedSettings = localStorage.getItem('settings');
         this.themeSettings = Boolean(storedSettings) ? JSON.parse(storedSettings) : settings.themeSettings;
     },
@@ -123,11 +252,8 @@ const settings = {
         this.refreshTextClrs();
     },
     refreshClrClsUI : function(objProp) {
-        // console.log(objProp);
         oldClr = this.colors[objProp];
-        console.log(oldClr);
         newClr = settings.getColors[objProp]();
-        console.log(newClr);
         const nodes = document.querySelectorAll(`.${oldClr}`)
         nodes.forEach(node => {
             node.classList.remove(oldClr);
@@ -141,22 +267,22 @@ const settings = {
     }
 }
 
-// ADD INDEX FUNCTIONALITY
-// let filteredRowLength = 0;
+
 
 function initializeApp() {
     // Initalize app
     document.addEventListener('DOMContentLoaded', () => {
-        settings.loadSettings();
+        settings.load();
         settings.refreshAllClrs()
+        sheetSettings.load()
         fileManagementUI();
 
-        loadCSVData().forEach(row => csvData.push(row));
+        loadCSVData().forEach(row => sheetSettings.csvData.push(row));
         // const filteredData = [...csvData];
         // mainColorLoad = localStorage.getItem('mainColor');
         
         // If data exists
-        if (csvData.length > 0) {
+        if (sheetSettings.csvData.length > 0) {
             // Populate Tool Drawer Setting
             localStorage.getItem('toolDrawer');
             // Populate Current File Text
@@ -165,7 +291,7 @@ function initializeApp() {
             swapFileOptions();
             excludedWords.clear()
             // Populate exludedWords set variable
-            
+            if () sheetSettings.csvData[0].map((header, index) => {sheetSettings.headerIndName[index] = header});
             const loadedWords = loadDataFromLocalStorage('excludedWords')
             if (loadedWords.length) {loadedWords.forEach(({word, colIndex}) => {
                 excludedWords.add({ word, colIndex });
@@ -201,9 +327,9 @@ function loadCSV(file) {
     const reader = new FileReader();
     reader.onload = function(event) {
         const csv = event.target.result;
-        csvData.length = 0;
+        sheetSettings.csvData.length = 0;
         csvSplit = csv.split('\n')
-        csvSplit.map(row => csvData.push(rowSplit(row,','))); // OPTIONS DELIMITER IS FLEXIBLE
+        csvSplit.map(row => sheetSettings.csvData.push(rowSplit(row,','))); // OPTIONS DELIMITER IS FLEXIBLE
         storeCSVData(csvData);
         renderTable(csvData);
     };
@@ -316,7 +442,7 @@ function saveSetToLocalStorage(name, setData) {
     saveDataToLocalStorage(name,Array.from(setData));
 }
 
-function loadSetFromLocatStorage(name) {
+function loadSetFromLocalStorage(name) {
     const loadedSet = loadDataFromLocalStorage(name)
     const outSet = new Set();
     if (loadedSet.length) {loadedSet.forEach(({key, value}) => {
@@ -337,21 +463,9 @@ function saveArrayToLocalStorage(name, arrData) {
     localStorage.setItem(name, JSON.stringify(arrData));
 }
 
-// Function to load CSV data from localStorage 
-// if csv exists else returns empty array
-function loadCSVData() {
-    const storedData = localStorage.getItem('csvData');
-    return storedData ? JSON.parse(storedData) : []
-}
 
-// Function to save CSV data to localStorage 
-function storeCSVData(data) {
-    localStorage.setItem('csvData', JSON.stringify(data));
-}
 
-function storeExcludedWords() {
-    saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
-}
+
 
 // HTML RENDERING AND CONTROL
 
@@ -476,10 +590,17 @@ function closeModalPopupUI() {
 }
 
 function optionBtnAction() {
-    console.log('optionBTNPUSHED')
     const options = populateUpperOptions('main');
     const colorBtns = pickColorUI('mainColor');
     openModalPopupUI(options,colorBtns);
+}
+
+function populateShowHideColsModal() {
+    const upperContainer = document.createElement('div');
+    upperContainer.id = 'upperContainer';
+    upperContainer.className = `flex flex-row w-full ${settings.colors.accentColorHigh} items-center overflow-wrap`;
+    console.log(csvData[0]);
+    return upperContainer;
 }
 
 function populateUpperOptions(highlighted) {
@@ -596,12 +717,10 @@ function pickColorUI(colorOption) {
             break;
     }
     settings.color_choices.forEach(color => {
-        // console.log(color);
         if (settings.themeSettings[colorOption] === color) {
             const colorBtn = colorChoiceUI(color.toLowerCase(),colorOption);
             colorBtn.classList.add('border-4');
             colorBtn.classList.add('border-white');
-            // console.log(settings.themeSettings[notClrOpt1]);
             // colorBtn.classList.add(`border-${settings.themeSettings[notClrOpt1]}-500`);
             pickColor.appendChild(colorBtn);
         } else if (settings.themeSettings[notClrOpt1] === color) {
@@ -656,6 +775,9 @@ function colorChoiceUI(color, colorOption) {
 }
 
 function hideColAction() {
+    const colOpt = populateShowHideColsModal()
+
+    openModalPopupUI(colOpt);
     return ''
 }
 
@@ -663,29 +785,18 @@ function addModuleBtnAction() {
     return ''
 }
 
+function toggleBtn(id, color='main', width='w-1/5', label='', callback, height='h-14', event_='click') {
+    const color_mid = settings.getColorMid(color);
+
+
+
+}
 // 
 function toolBtnGen(id, color='main', width='w-1/5', label='', callback, height='h-14', event_='click') {
-    switch (color) {
-        case 'main':
-            color_swtch = `${settings.colors.mainColorMid}`;
-            break;
-        case 'accent':
-            color_swtch = `${settings.colors.accentColorMid}`;
-            break;
-        case 'warning':
-            color_swtch = `${settings.colors.warningColorMid}`;
-            break;
-        case 'clear':
-            color_swtch = `bg-inherit`;
-            break;
-        default:
-            color_swtch = `${settings.colors.mainColorMid}`;
-            break;
-    }
-
+    const color_mid = settings.getColorMid(color);
     const div = document.createElement('div');;
     div.id = `${id}-div`
-    div.className = `m-2 grid justify-items-center ${height} ${width} ${color_swtch} ${settings.themeSettings.border} rounded-${settings.themeSettings.rounded}`;
+    div.className = `m-2 grid justify-items-center ${height} ${width} ${color_mid} ${settings.themeSettings.border} rounded-${settings.themeSettings.rounded}`;
     const button = document.createElement('button');
     button.id = id;
     button.className = 'text-center';
@@ -999,8 +1110,6 @@ function importExcludeWords(file){
         csvSplit.map(row => file.push(rowSplit(row,','))); // OPTIONS DELIMITER IS FLEXIBLE
         file.forEach((item) => {
             [word, colIndex] = item;
-            console.log(word);
-            console.log(colIndex);
             excludedWords.add({ word, colIndex });
         });
         storeExcludedWords();
