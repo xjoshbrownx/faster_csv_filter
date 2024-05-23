@@ -47,16 +47,16 @@ const settings = {
     getColorMid : function(color){
         switch (color) {
             case 'main':
-                color_swtch = `${settings.colors.mainColorMid}`;
+                var color_swtch = `${settings.colors.mainColorMid}`;
                 break;
             case 'accent':
-                color_swtch = `${settings.colors.accentColorMid}`;
+                var color_swtch = `${settings.colors.accentColorMid}`;
                 break;
             case 'warning':
-                color_swtch = `${settings.colors.warningColorMid}`;
+                var color_swtch = `${settings.colors.warningColorMid}`;
                 break;
             case 'clear':
-                color_swtch = `bg-inherit`;
+                var color_swtch = `bg-inherit`;
                 break;
             default:
                 color_swtch = `${settings.colors.mainColorMid}`;
@@ -153,7 +153,6 @@ const settings = {
     }
 }
 
-
 // Declare variables
 const sheet = {
     settings : {
@@ -234,12 +233,12 @@ const sheet = {
         temp.excludedWords = Array.from(temp.excludedWords)
         localStorage.setItem('sheetSettings', JSON.stringify(temp));
     },
-    toggleToolDrawer : function() {this.settings.toolDrawer = this.settings.toolDrawer ? 0 : 1},
-
-
-    loadCSVData: function() {
+    toggleToolDrawer : function() {
+        this.settings.toolDrawer = this.settings.toolDrawer ? 0 : 1;
+    },
+    loadstoredCSVData: function() {
         const storedData = localStorage.getItem('csvData');
-        this.csvData = storedData ? JSON.parse(storedData) : []
+        this.csvData = storedData ? JSON.parse(storedData) : [];
     },
     // storeCSVData : function() {
         // Function to save CSV data to localStorage 
@@ -280,12 +279,12 @@ function initializeApp() {
         // sheet.sheetSettings.load()
         fileManagementUI();
 
-        sheet.loadCSVData().forEach(row => sheetSettings.csvData.push(row));
+        sheet.loadstoredCSVData();
         // const filteredData = [...csvData];
         // mainColorLoad = localStorage.getItem('mainColor');
         
         // If data exists
-        if (sheetSettings.csvData.length > 0) {
+        if (sheet.data.csvData.length > 0) {
             // Populate Tool Drawer Setting
             localStorage.getItem('toolDrawer');
             // Populate Current File Text
@@ -300,7 +299,7 @@ function initializeApp() {
                 excludedWords.add({ word, colIndex });
             });}
         };
-        if (toolDrawer) {
+        if (sheet.settings.toolDrawer) {
             toggleToolDrawerUI();
         }
         updateExcludedWordsList();
