@@ -1,118 +1,4 @@
-// Declare variables
-const sheet = {
-    settings = {
-        toolDrawer : 0,
-        modules : [],
-        hasHeaders : true,        
-    },
-
-    data = {
-        fileName : 'No Active File',
-        csvData : [],
-        headerIndName : {},
-        filteredRowList : [],
-        filteredData : [],
-    },
-
-    // Process Data
-    addWordFilterModule : function() {
-        obj = {
-            type : 'wordFilter',
-            wordlist : new Set(),
-            exclude : true,
-        };
-        this.settings.modules.push(obj);
-    },
-
-    addWordLabelModule : function() {
-        obj = {
-            type : 'wordLabel',
-            wordlist : new Set(),
-            exclude : true,
-            label : '',
-            labelColumn : 0,
-        };
-        this.settings.modules.push(obj);
-    },
-
-    addNumberFilterModule : function() {
-        obj = {
-            type : 'numberFilter',
-            value : 0,
-            operator : '',
-            filterColumn : 0,
-        };
-        this.settings.modules.push(obj);
-    },
-
-    addNumberLabelModule : function() {
-        obj = {
-            type : 'numberLabel',
-            value : 0,
-            operator : '',
-            filterColumn : 0,
-            labelColumn : -1,
-        };
-        this.settings.modules.push(obj);
-    },
-
-    filterData : function(module) {
-        this.data.filteredData = this.data.csvData.filter((row) => module)
-    },
-
-    // Data Management
-    loadData : function() {
-        const temp = localStorage.getItem('sheetData');
-        this.data = Boolean(temp) ? JSON.parse(storedData) : sheet.data;
-    },
-    storeData : function() {
-        localStorage.setItem('sheetData', JSON.stringify(this.data));        
-    },
-    
-    // Settings Management
-    loadSettings : function() {
-        this.toolDrawer
-    },
-    storeSettings : function() {
-        const temp = {...this.settings}
-        temp.excludedWords = Array.from(temp.excludedWords)
-        localStorage.setItem('sheetSettings', JSON.stringify(temp));
-    },
-    toggleToolDrawer : function() {this.settings.toolDrawer = this.settings.toolDrawer ? 0 : 1},
-
-
-    loadCSVData: function() {
-        const storedData = localStorage.getItem('csvData');
-        this.csvData = storedData ? JSON.parse(storedData) : []
-    },
-    // storeCSVData : function() {
-        // Function to save CSV data to localStorage 
-        // localStorage.setItem('csvData', JSON.stringify(this.csvData));
-    // },
-    storeFilename : function() {
-        
-    },
-    storeExcludedWords : function() {
-        saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
-    },
-    clear : function() {
-        this.clearData();
-        this.clearExcludeWords();
-    },
-    clearData : function() {
-        this.fileName = 'No Active File',
-        this.csvData = [],
-        this.headerIndName = {},
-        this.filteredRowList = [],
-        this.filteredData = [],
-        this.localStorage.removeItem('sheetData');
-    },
-    clearExcludeWords : function() {
-        this.excludedWords.clear();
-        
-    },
-}
-
+// import  settings from './interface.js'
 const settings = {
     themeSettings : {
         mainColor : 'slate',
@@ -216,11 +102,11 @@ const settings = {
         localStorage.setItem('settings',JSON.stringify(this.themeSettings));
     },
     load : function() {
-        storedSettings = localStorage.getItem('settings');
+        const storedSettings = localStorage.getItem('settings');
         this.themeSettings = Boolean(storedSettings) ? JSON.parse(storedSettings) : settings.themeSettings;
     },
     refreshValues : function() {
-        midMap = {1:300,2:400,3:500,4:600,5:700}; 
+        const midMap = {1:300,2:400,3:500,4:600,5:700}; 
         this.midClrVal = midMap[this.brightness];
         this.lowClrVal = Math.max(((3-this.contrast)*100),50);
         this.highClrVal = Math.min(((this.contrast)*100)+this.midClrVal,950);
@@ -252,8 +138,8 @@ const settings = {
         this.refreshTextClrs();
     },
     refreshClrClsUI : function(objProp) {
-        oldClr = this.colors[objProp];
-        newClr = settings.getColors[objProp]();
+        const oldClr = this.colors[objProp];
+        const newClr = settings.getColors[objProp]();
         const nodes = document.querySelectorAll(`.${oldClr}`)
         nodes.forEach(node => {
             node.classList.remove(oldClr);
@@ -268,16 +154,133 @@ const settings = {
 }
 
 
+// Declare variables
+const sheet = {
+    settings : {
+        toolDrawer : 0,
+        modules : [],
+        hasHeaders : true,        
+    },
+
+    data : {
+        fileName : 'No Active File',
+        csvData : [],
+        headerIndName : {},
+        filteredRowList : [],
+        filteredData : [],
+    },
+
+    // Process Data
+    addWordFilterModule : function() {
+        obj = {
+            type : 'wordFilter',
+            wordlist : new Set(),
+            exclude : true,
+        };
+        this.settings.modules.push(obj);
+    },
+
+    addWordLabelModule : function() {
+        obj = {
+            type : 'wordLabel',
+            wordlist : new Set(),
+            exclude : true,
+            label : '',
+            labelColumn : 0,
+        };
+        this.settings.modules.push(obj);
+    },
+
+    addNumberFilterModule : function() {
+        obj = {
+            type : 'numberFilter',
+            value : 0,
+            operator : '',
+            filterColumn : 0,
+        };
+        this.settings.modules.push(obj);
+    },
+
+    addNumberLabelModule : function() {
+        obj = {
+            type : 'numberLabel',
+            value : 0,
+            operator : '',
+            filterColumn : 0,
+            labelColumn : -1,
+        };
+        this.settings.modules.push(obj);
+    },
+
+    processData : function(module) {
+        this.data.filteredData = this.data.csvData.filter((row) => module)
+    },
+
+    // Data Management
+    loadData : function() {
+        const temp = localStorage.getItem('sheetData');
+        this.data = Boolean(temp) ? JSON.parse(storedData) : sheet.data;
+    },
+    storeData : function() {
+        localStorage.setItem('sheetData', JSON.stringify(this.data));        
+    },
+    
+    // Settings Management
+    loadSettings : function() {
+        this.toolDrawer
+    },
+    storeSettings : function() {
+        const temp = {...this.settings}
+        temp.excludedWords = Array.from(temp.excludedWords)
+        localStorage.setItem('sheetSettings', JSON.stringify(temp));
+    },
+    toggleToolDrawer : function() {this.settings.toolDrawer = this.settings.toolDrawer ? 0 : 1},
+
+
+    loadCSVData: function() {
+        const storedData = localStorage.getItem('csvData');
+        this.csvData = storedData ? JSON.parse(storedData) : []
+    },
+    // storeCSVData : function() {
+        // Function to save CSV data to localStorage 
+        // localStorage.setItem('csvData', JSON.stringify(this.csvData));
+    // },
+    storeFilename : function() {
+        
+    },
+    storeExcludedWords : function() {
+        saveDataToLocalStorage('excludedWords',Array.from(excludedWords));
+    },
+    clear : function() {
+        this.clearData();
+        this.clearExcludeWords();
+    },
+    clearData : function() {
+        this.fileName = 'No Active File',
+        this.csvData = [],
+        this.headerIndName = {},
+        this.filteredRowList = [],
+        this.filteredData = [],
+        this.localStorage.removeItem('sheetData');
+    },
+    clearExcludeWords : function() {
+        this.excludedWords.clear();
+        
+    },
+}
+
 
 function initializeApp() {
     // Initalize app
     document.addEventListener('DOMContentLoaded', () => {
-        settings.load();
+        settings.load()
         settings.refreshAllClrs()
-        sheetSettings.load()
+        sheet.loadSettings();
+        sheet.loadData();
+        // sheet.sheetSettings.load()
         fileManagementUI();
 
-        loadCSVData().forEach(row => sheetSettings.csvData.push(row));
+        sheet.loadCSVData().forEach(row => sheetSettings.csvData.push(row));
         // const filteredData = [...csvData];
         // mainColorLoad = localStorage.getItem('mainColor');
         
@@ -291,7 +294,7 @@ function initializeApp() {
             swapFileOptions();
             excludedWords.clear()
             // Populate exludedWords set variable
-            if () sheetSettings.csvData[0].map((header, index) => {sheetSettings.headerIndName[index] = header});
+            if (sheetSettings.data.csvData.length) sheetSettings.csvData[0].map((header, index) => {sheetSettings.headerIndName[index] = header});
             const loadedWords = loadDataFromLocalStorage('excludedWords')
             if (loadedWords.length) {loadedWords.forEach(({word, colIndex}) => {
                 excludedWords.add({ word, colIndex });
@@ -542,7 +545,7 @@ function toolContainerUI() {
     const toolContainer = document.createElement('div');
     toolContainer.id = "toolContainer";
     toolContainer.className = "flex flex-row items-center"; 
-    if (toolDrawer) {populateToolContainer()} 
+    if (sheet.settings.toolDrawer) {populateToolContainer()} 
     return toolContainer;
 }
 
