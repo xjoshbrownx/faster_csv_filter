@@ -153,6 +153,24 @@ const settings = {
     }
 }
 
+class filterModule {
+    constructor(modType) {
+        this.type = modType;
+    }
+    static fromWordList(modType, wordList) {
+        this.modeType = modType;
+        this.wordList = wordList;
+    }
+    build() {
+        if (this.type==='filterCol') {
+            this.wordList = new Set();
+                
+
+        }
+    }
+}
+
+
 // Declare variables
 const sheet = {
     settings : {
@@ -168,6 +186,13 @@ const sheet = {
         filteredRowList : [],
         filteredData : [],
     },
+    addModule : function(modeType) {
+
+    },
+    removeModule : function(modInd) {
+        
+    },
+
 
     // Process Data
     addWordFilterModule : function() {
@@ -210,6 +235,7 @@ const sheet = {
         };
         this.settings.modules.push(obj);
     },
+
 
     processData : function(module) {
         this.data.filteredData = this.data.csvData.filter((row) => module)
